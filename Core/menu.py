@@ -14,7 +14,9 @@ class Menu:
     def __init__(self):
         self.menu()
 
-    def main_prompt(self):
+
+    @staticmethod
+    def main_prompt():
 
         if SessionManager.current_session:
 
@@ -135,9 +137,9 @@ class Menu:
                         print(f"\n{c.alt} No session selected")
                         
                     else:
-                        for session_id, (socket, user) in SessionManager.current_session.items():
-                            agent = Agent(socket, user)
-                            agent.shell()         
+                        socket = self.get_current_session_value()
+                        agent = Agent(socket)
+                        agent.shell()
                             
                             
                 elif main_arg == "generate":
@@ -213,10 +215,10 @@ class Menu:
                         else: 
                             local_path = args[1].strip()
                             upload_path = args[2].strip()
-                            
-                            for session_id, (socket, user) in SessionManager.current_session.items():
-                                agent = Agent(socket, user)
-                                agent.upload_file(local_path, upload_path)
+
+                            socket = self.get_current_session_value()
+                            agent = Agent(socket)
+                            agent.upload_file(local_path, upload_path)
                         
                                 
                 elif main_arg == "download":
@@ -231,15 +233,20 @@ class Menu:
                         else:
                             download_path = args[1].strip()
 
-                            for session_id, (socket, user) in SessionManager.current_session.items():
-                                agent = Agent(socket, user)
-                                agent.downloadFile(download_path)
+                            socket = self.get_current_session_value()
+                            agent = Agent(socket)
+                            agent.downloadFile(download_path)
                     
                 else:
                     print(f"\n{c.alt} Invalid command")
                     
         except KeyboardInterrupt:
             self.quit_hawks()
+
+    @staticmethod
+    def get_current_session_value():
+        for session_id, (socket, user) in SessionManager.current_session.items():
+            return socket
 
 
     def quit_hawks(self):
@@ -252,14 +259,14 @@ class Menu:
                 
                 agents_db = AgentsDB()
                 session = SessionManager()
-                
+
                 session.killAllSessions()
                 agents_db.clear_table()
 
             
                 thanks()
-                exit(0)
-                
+                exit()
+
             else:
                 self.menu()
                 

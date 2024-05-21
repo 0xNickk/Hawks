@@ -6,6 +6,7 @@ import os
 
 
 class SessionManager:
+
     current_session = {}  #sessionId: socket, user, computerName
     agents_connections = {}  #sessionId: socket
     sessions_alias = {}  #alias: sessionId
@@ -22,7 +23,8 @@ class SessionManager:
 
         return session_id
 
-    def view_sessions(self):
+    @staticmethod
+    def view_sessions():
 
         agents_db = AgentsDB()
         agents = agents_db.get_agents()
@@ -31,7 +33,7 @@ class SessionManager:
             print(f"\n{c.alt} No active sessions")
             return
 
-        fields = ['session_id', 'external_ip', 'os', 'user', 'status']
+        fields = ['session_id', 'agent_ip', 'os', 'user', 'status']
         field_names = ['Session ID', 'IP Address', 'OS', 'User', 'Status']
 
         max_lengths = {field: max(max(len(agent[field]), len(field_name)) for agent in agents) + 1 for field, field_name
@@ -45,6 +47,7 @@ class SessionManager:
             print(" ".join(
                 f"{agent[field] if field != 'status' else status_color + agent[field] + c.RS:<{max_lengths[field]}}" for
                 field in fields))
+
 
     def valid_session_id(self, session_id):
 
@@ -170,7 +173,4 @@ class SessionManager:
 
                 print(f"\n{c.info} Alias ({alias}) set for session: {c.RS}{agents_db.get_agent_user(alias)}{c.RS}")
 
-    def update_agent_status(self, session_id, status):
 
-        agents_db = AgentsDB()
-        agents_db.update_agent_status(session_id, status)

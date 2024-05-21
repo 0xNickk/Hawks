@@ -1,20 +1,23 @@
 TODO:
-    X - Fix updateSessionsCommand and sanitizeCommandOuput (agent) for autocomplete  command in shell 
+    X - Fix updateSessionsCommand and sanitizeCommandOuput (agent) for autocomplete  command in shell [18/05/2024]
+    X - Retrive ngrok address and port in payload generator [19/05/2024]
+    X - Fix client download path  [19/05/2024]
+    X - Rewrite handle_agent [21/05/2024]
     - Add command protection in shell 
-    - Fix client path upload  
-    X - Fix client download path 
-    - Rewrite function to get IP address for bind File server listener 
+    - Fix client path upload
+    - Fix prompt input when thread get called
+    - Rewrite function to get IP address for bind File server listener
     - Add last ping in session info
-    X - Retrive ngrok address and port in payload generator
-    - Rewrite handle_agent
     - Fix buggy obfuscastion functions
+    - Get payload type running in agent
+
 
 
 PROGRAMMED FEATURES:
     - Save listeners in database
     - File Server accept external request 
     - Add new listeners (HTTPS)
-    - Add new payload
+    - Add new payload (Linux)
     - Save agent connections
     - Persistent agent
-    - Add evasion tecniques () 
+    - Add evasion techniques

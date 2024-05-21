@@ -34,7 +34,6 @@ def print_banner():
 
 
 def help():
-
     print(f'''
   {c.O}Command          {c.O}Description{c.RS}
   ───────          ───────────

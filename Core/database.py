@@ -45,8 +45,8 @@ class AgentsDB:
             '''
             CREATE TABLE IF NOT EXISTS agents
             (   
-                session_id   TEXT     PRIMARY KEY,
-                external_ip  TEXT,
+                session_id  TEXT     PRIMARY KEY,
+                agent_ip    TEXT,
                 os          TEXT,
                 user        TEXT,
                 status      TEXT
@@ -57,9 +57,9 @@ class AgentsDB:
         self.dbConn.commit()
         
         
-    def add_agent(self, session_id, external_ip, os, user, status):
+    def add_agent(self, session_id, agent_ip, os, user, status):
 
-        self.cursor.execute("INSERT INTO agents (session_id, external_ip, os, user, status) VALUES (?, ?, ?, ?, ?)", (session_id, external_ip, os, user, status))
+        self.cursor.execute("INSERT INTO agents (session_id, agent_ip, os, user, status) VALUES (?, ?, ?, ?, ?)", (session_id, agent_ip, os, user, status))
         self.dbConn.commit()
 
     def update_agent_status(self, session_id, status):
@@ -82,7 +82,7 @@ class AgentsDB:
 
         self.cursor.execute("SELECT * FROM agents")
         rows = self.cursor.fetchall()
-        agents = [{"session_id": row[0], "external_ip": row[1], "os": row[2], "user": row[3], "status": row[4]} for row in rows]
+        agents = [{"session_id": row[0], "agent_ip": row[1], "os": row[2], "user": row[3], "status": row[4]} for row in rows]
         return agents
     
     def get_agent_user(self, session_id):
@@ -153,7 +153,8 @@ class ListenersDB:
                 listener_id   TEXT     PRIMARY KEY,
                 bind_address  TEXT,
                 bind_port     INTEGER,
-                ssl          TEXT
+                payload_type  TEXT,
+                ssl           TEXT
             )
             '''
         )
@@ -171,6 +172,11 @@ class ListenersDB:
     def delete_listener(self, listener_id):
 
         self.cursor.execute("DELETE FROM listeners WHERE listener_id=?", (listener_id,))
+        self.dbConn.commit()
+
+    def add_payload_type(self, listener_id, payload_type):
+
+        self.cursor.execute("UPDATE listeners SET payload_type=? WHERE listener_id=?", (payload_type, listener_id))
         self.dbConn.commit()
         
     

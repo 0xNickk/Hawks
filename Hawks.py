@@ -23,37 +23,39 @@ def main():
     listeners_db = ListenersDB()
     listeners_db.create_table()
 
+    if TCPServerSettings.SSL or HTTPFileServerSettings.SSL:
+        SSLConfig()
 
-    if TCPServerSettings.SSL:
-        SSLConfig()
-      
     tcp_server = TCPServer(TCPServerSettings.bind_address, TCPServerSettings.bind_port, TCPServerSettings.buffer_size, TCPServerSettings.ngrok_tunnel, TCPServerSettings.SSL)
-    tcp_server.start()
-    
-    if HTTPFileServerSettings.SSL:
-        SSLConfig()
-      
     http_server = HttpFileServer(HTTPFileServerSettings.bind_address, HTTPFileServerSettings.bind_port, HTTPFileServerSettings.SSL)
+
+    tcp_server.start()
     http_server.start()
-    
+
     print(f"\n{c.info} Welcome! Type 'help' to see available commands{c.RS}")
     
     Menu()
     
 
 def SSLConfig():
-    
+
     ssl_dir = SSLSettings.ssl_dir
-    key_file = SSLSettings.key_file
-    cert_file = SSLSettings.cert_file
-    
+
     if not os.path.exists(ssl_dir):
         os.mkdir(ssl_dir)
-    
-    if not os.path.exists(ssl_dir + key_file) or not os.path.exists(ssl_dir + cert_file):
+
+    if len(os.listdir(ssl_dir)) == 2:
+
+        prompt = input(f"{c.add} Found existing SSL keys{c.RS}, use them? (y/n) : ")
+        if prompt.lower() == "y":
+            return
+
+    else:
         generate_keys()
 
 
-    
+
+
+
 if __name__ == "__main__":
     main()

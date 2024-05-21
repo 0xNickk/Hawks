@@ -1,29 +1,12 @@
 from .common import *
-from .handle_agent import save_agent
 from .settings import TCPServerSettings, SSLSettings
-from .agent import FileHandler
+from .agent import Agent, FileHandler
 
 from pyngrok import ngrok
 from http.server import HTTPServer
 from pyngrok.exception import PyngrokNgrokError
 import socket, ssl, threading
 
-
-class SSLSetup:
-
-    @staticmethod
-    def setup_ssl_context(cert_file, key_file):
-
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-
-        try:
-            context.load_cert_chain(cert_file, key_file)
-
-        except FileNotFoundError:
-            print(f"\n{c.alt} {c.O}Error{c.RS}: Failed to start SSL Server, cert.pem or key.pem not found")
-            exit(0)
-
-        return context
 
 
 class TCPServer:
@@ -105,11 +88,11 @@ class TCPServer:
     def listen(self):
 
         while self.is_listen:
-            conn, address = self.tcp_listener.accept()
+            conn, agent_ip = self.tcp_listener.accept()
 
-            external_ip = address[0]
-            print(f"\n\n{c.info} Connection with {c.G}{address[0]}:{address[1]}{c.RS} established")
-            save_agent(conn, external_ip)
+            agent = Agent(conn)
+            agent.save_agent(agent_ip)
+
 
     def stopTCPServer(self):
 
@@ -152,3 +135,21 @@ class HttpFileServer:
 
         self.file_server.shutdown()
         self.file_server.server_close()
+
+
+
+class SSLSetup:
+
+    @staticmethod
+    def setup_ssl_context(cert_file, key_file):
+
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+
+        try:
+            context.load_cert_chain(cert_file, key_file)
+
+        except FileNotFoundError:
+            print(f"\n{c.alt} {c.O}Error{c.RS}: Failed to start SSL Server, cert.pem or key.pem not found")
+            exit(0)
+
+        return context
