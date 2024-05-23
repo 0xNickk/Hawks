@@ -82,13 +82,13 @@ class SessionManager:
         else:
             return
 
-    def killSession(self, session_id):
+    def kill_session(self, session_id):
         agents_db = AgentsDB()
 
         if self.valid_session_id(session_id):
 
             if self.killAll:
-                self.killAllSessions()
+                self.kill_all_sessions()
 
             else:
 
@@ -100,13 +100,13 @@ class SessionManager:
                     conn = self.agents_connections[session_id]
 
                     conn.close()
-                    self.clearSession(session_id)
+                    self.delete_session(session_id)
 
                     print(f"{INFO} Session terminated")
 
             return
 
-    def clearSession(self, session_id, agents_db=AgentsDB()):
+    def delete_session(self, session_id, agents_db=AgentsDB()):
 
         if self.sessions_alias.get(session_id):
             del self.sessions_alias[session_id]
@@ -119,7 +119,7 @@ class SessionManager:
 
         agents_db.delete_agent(session_id)
 
-    def killAllSessions(self):
+    def kill_all_sessions(self):
 
         agents_db = AgentsDB()
         agents = agents_db.get_agents()
@@ -134,7 +134,7 @@ class SessionManager:
                 try:
 
                     conn.close()
-                    self.clearSession(session_id)
+                    self.delete_session(session_id)
 
                 except ConnectionError:
                     pass
@@ -145,7 +145,7 @@ class SessionManager:
         else:
             print(f"\n{ALERT} No active sessions")
 
-    def setAlias(self, session_id, alias):
+    def set_alias(self, session_id, alias):
         agents_db = AgentsDB()
 
         if self.valid_session_id(session_id):

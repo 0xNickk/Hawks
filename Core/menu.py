@@ -102,7 +102,7 @@ class Menu:
                         session_id = second_arg.strip()
                         alias = args[2].strip()
                             
-                        session.setAlias(session_id, alias)
+                        session.set_alias(session_id, alias)
                         
                         
                 elif main_arg  == "kill":
@@ -114,10 +114,10 @@ class Menu:
                         session_id = second_arg.strip()
                         
                         if session_id == "all":
-                            session.killAllSessions()
+                            session.kill_all_sessions()
                             
                         else:
-                            session.killSession(session_id)
+                            session.kill_session(session_id)
                     
                 elif main_arg  == "interact":
                     
@@ -258,7 +258,7 @@ class Menu:
                 agents_db = AgentsDB()
                 session = SessionManager()
 
-                session.killAllSessions()
+                session.kill_all_sessions()
                 agents_db.clear_table()
 
             else:
