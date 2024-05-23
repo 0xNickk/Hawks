@@ -39,12 +39,12 @@ def torConfig(self):
     controlPortExists = False
     
     if not os.path.exists(torrcFile):
-        print(f"{c.alt} Tor configuration file not found")
+        print(f"{ALERT} Tor configuration file not found")
         exit(0)
         
     else:
         
-        print(f"{c.info} Setting up ControlPort in torrc file ...")
+        print(f"{INFO} Setting up ControlPort in torrc file ...")
         
         try:
             with open(torrcFile, "r") as file:
@@ -67,7 +67,7 @@ def torConfig(self):
 
 
         except:
-            print(f"{c.alt} Failed to write to torrc file, start Hawks using sudo")
+            print(f"{ALERT} Failed to write to torrc file, start Hawks using sudo")
             exit(0)
         
         

@@ -25,7 +25,7 @@ class AgentsDB:
 
         except OSError:
 
-            print(f"{c.alt} {c.O}Error{c.RS}: Could not create databases directory")
+            print(f"{ERROR} Could not create databases directory")
 
         try:
             
@@ -35,7 +35,7 @@ class AgentsDB:
             
         except sqlite3.Error:
 
-            print(f"{c.alt} {c.O}Error{c.RS}: Could not open database file agents.db")
+            print(f"{ERROR} Could not open database file agents.db")
             
         
     def create_table(self):
@@ -130,7 +130,7 @@ class ListenersDB:
             
         except OSError:
 
-            print(f"{c.alt} {c.O}Error{c.RS}: Could not create databases directory")
+            print(f"{ERROR} Could not create databases directory")
         
         try:
             
@@ -140,7 +140,7 @@ class ListenersDB:
             
         except sqlite3.Error as e:
 
-            print(f"{c.alt} {c.O}Error{c.RS}: Could not open database file listeners.db")
+            print(f"{ERROR} Could not open database file listeners.db")
             
             
     def create_table(self):

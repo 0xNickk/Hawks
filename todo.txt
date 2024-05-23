@@ -3,9 +3,10 @@ TODO:
     X - Retrive ngrok address and port in payload generator [19/05/2024]
     X - Fix client download path  [19/05/2024]
     X - Rewrite handle_agent [21/05/2024]
+    X - Fix reset main prompt [23/05/2024]
     - Add command protection in shell 
     - Fix client path upload
-    - Fix prompt input when thread get called
+    - Handle threads better
     - Rewrite function to get IP address for bind File server listener
     - Add last ping in session info
     - Fix buggy obfuscastion functions

@@ -1,41 +1,65 @@
 from os import system
+import readline, sys
+
+#Colors
+ORANGE = '\033[93m'
+YELLOW = '\u001b[33m'
+RED = '\033[1;31m'
+GREEN = '\033[38;5;82m'
+RST = '\033[0m'
+UNDERLINE = "\033[4m"
+BOLD = '\033[1m'
+
+ALERT = "[*]"
+ADD = "[+]"
+LOAD = "[~]"
+ERROR = f"[{ORANGE}Error{RST}]"
+INFO = f"[{GREEN}Info{RST}]"
+FILESERVER = f"[{YELLOW}Fileserver{RST}]"
+SHELL = f"[{YELLOW}Shell{RST}]"
+TCPSERVER = f"[{YELLOW}TCPserver{RST}]"
 
 
-class c:
-    O = '\033[93m'  # orange
-    Y = '\u001b[33m'  # yellow
-    R = '\033[1;31m'  # red
-    G = '\033[38;5;82m'  # green
-    RS = '\033[0m'  # default color
-    UND = "\033[4m"  # underline
-    bold = '\033[1m'
-    alt = "[*]"
-    add = "[+]"
-    load = "[~]"
-    error = f"{O}error{RS}"
-    info = f"[{G}info{RS}]"
+class Helper:
+    help_kill = f"\nTerminate a backdoor session\n{ORANGE}Usage{RST}: kill <session id> or all"
+    help_sessions = f"\nPrint established backdoor sessions"
+    help_alias = f"\nSet an alias for a session\n{ORANGE}Usage{RST}: alias <session id> <alias name>"
+    help_interact = f"\nInteract with an agent\n{ORANGE}Usage{RST}: interact <session id>"
+    help_shell = "\nEnable interactive shell with an agent"
+    help_generate = f"\nGenerate payloads\n{ORANGE}Usage{RST}: generate <payload_template> <lhost> <options>\n'ngrok' as lhost if ngrok tunneling is enabled"
+    help_download = f"\nDownload a file from agent\n{ORANGE}Usage{RST}: download <file path>"
+    help_upload = f"\nUpload a file to agent\n{ORANGE}Usage{RST}: upload <local file path> <upload file path>"
 
 
-class Message:
-    missSessionId = f"\n{c.alt} Missing <session id> argument"
-    shellClosed = "\n[*] Shell deactivated"
+class Payload_Helper:
+    help_powershell = f"\nWindows PowerShell Reverse TCP\n{ORANGE}Required arguments{RST}: <lhost>\nSupported utilities: obfuscate"
+    help_powershell_ssl = f"\nWindows PowerShell Reverse TCP SSL\n{ORANGE}Required arguments{RST}: <lhost>\nSupported utilities: obfuscate"
+
+
+class Main_Prompt:
+
+    prompt = f"\n{UNDERLINE}Hawks{RST}> "
+
+    @staticmethod
+    def rst_prompt_menu():
+        sys.stdout.write('\r' + Main_Prompt.prompt + readline.get_line_buffer())
 
 
 def print_banner():
     print(f'''
 
-{c.R}
+{RED}
 
     ╦ ╦ ┌─┐┬ ┬┬┌─┌─┐
     ╠═╣ ├─┤│││├┴┐└─┐
-    ╩ ╩ ┴ ┴└┴┘┴ ┴└─┘ {c.RS}v2
-    {c.R}────────────────{c.O}  C2{c.RS}                
+    ╩ ╩ ┴ ┴└┴┘┴ ┴└─┘ {RST}v2
+    {RED}────────────────{ORANGE}  C2{RST}                
 ''')
 
 
 def help():
     print(f'''
-  {c.O}Command          {c.O}Description{c.RS}
+  {ORANGE}Command          {ORANGE}Description{RST}
   ───────          ───────────
   help       [~]   Print this message
   sessions   [+]   Print established backdoor sessions
@@ -54,51 +78,11 @@ def help():
 
   Command with [+] required additional actions
   TAB for auto-completion commands
-  For use details: {c.O} help <COMMAND> {c.RS}''')
+  For use details: {ORANGE} help <COMMAND> {RST}''')
 
 
-def thanks():
-    print(f"\n\nCreated by: {c.O}@0xNick{c.RS}\nThank you for using Hawks!")
-
-
-def help_kill():
-    print(f"\nTerminate a backdoor session\n{c.O}Usage{c.RS}: kill <session id> or all")
-
-
-def help_sessions():
-    print(f"\nPrint established backdoor sessions")
-
-
-def help_alias():
-    print(f"\nSet an alias for a session\n{c.O}Usage{c.RS}: alias <session id> <alias name>")
-
-
-def help_interact():
-    print(f"\nInteract with an agent\n{c.O}Usage{c.RS}: interact <session id>")
-
-
-def help_shell():
-    print(f"\nEnable interactive shell with an agent")
-
-
-def help_generate():
-    print(f"\nGenerate payloads\n{c.O}Usage{c.RS}: generate <payload_template> <lhost> <options>\n'ngrok' as lhost if ngrok tunneling enabled")
-
-
-def help_powershell_payload():
-    print(f"\nWindows PowerShell Reverse TCP\n{c.O}Required arguments{c.RS}: <lhost>\nSupported utilities: obfuscate")
-
-
-def help_powershell_ssl_payload():
-    print(f"\nWindows PowerShell Reverse TCP SSL\n{c.O}Required arguments{c.RS}: <lhost>\nSupported utilities: obfuscate")
-
-
-def help_download():
-    print(f"\nDownload a file from agent\n{c.O}Usage{c.RS}: download <file path>")
-
-
-def help_upload():
-    print(f"\nUpload a file to agent\n{c.O}Usage{c.RS}: upload <local file path> <upload file path>")
+def print_thanks_message():
+    print(f"\n\nCreated by: {ORANGE}@0xNick{RST}\nThank you for using Hawks!")
 
 
 def clear_screen():

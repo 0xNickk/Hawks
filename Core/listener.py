@@ -20,7 +20,6 @@ class TCPServer:
         self.is_listen    = False
         self.ssl_enabled  = ssl_enabled
 
-
     def create_socket(self):
 
         tcp_listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -48,12 +47,12 @@ class TCPServer:
 
         except socket.error:
 
-            print(f"\n{c.alt} {c.O}Error{c.RS}: Failed to start TCP Listener, port seems already in use")
+            print(f"\n{ERROR} Failed to start TCP Listener, port seems already in use")
             exit(0)
 
         except Exception as e:
 
-            print(f"\n{c.alt} {c.O}Error{c.RS}: Failed to start TCP Listener, {e}")
+            print(f"\n{ERROR} Failed to start TCP Listener, {e}")
             exit(0)
 
         if self.ngrok_tunnel:
@@ -70,15 +69,15 @@ class TCPServer:
 
             except PyngrokNgrokError:
 
-                print(f"\n{c.alt} {c.O}Failed{c.RS} to start ngrok TCP tunnel, check ngrok configuration")
+                print(f"\n{ERROR} Failed to start ngrok TCP tunnel, check ngrok configuration")
                 return
 
             except Exception as e:
 
-                print(f"\n{c.alt} {c.O}Failed{c.RS} to start ngrok TCP tunnel, {e}")
+                print(f"\n{ALERT} Failed to start ngrok TCP tunnel, {e}")
                 return
 
-        print(f"\n{c.bold}TCP Multi-Handler:: {c.RS}{c.Y}{self.bind_address}{c.RS}:{c.Y}{self.bind_port}{c.RS} {ssl_tcp_enabled}")
+        print(f"\n{BOLD}TCP Multi-Handler:: {RST}{YELLOW}{self.bind_address}{RST}:{YELLOW}{self.bind_port}{RST} {ssl_tcp_enabled}")
 
         self.is_listen = True
         self.tcp_listener.listen()
@@ -89,10 +88,10 @@ class TCPServer:
 
         while self.is_listen:
             conn, agent_ip = self.tcp_listener.accept()
-
             agent = Agent(conn)
             agent.save_agent(agent_ip)
 
+        return
 
     def stopTCPServer(self):
 
@@ -122,12 +121,12 @@ class HttpFileServer:
                 self.file_server.socket = context.wrap_socket(self.file_server.socket, server_side=True)
                 ssl_http_enabled = "(SSL)"
 
-            print(f"{c.bold}HTTP File Server:: {c.RS}{c.Y}{self.bind_address}{c.RS}:{c.Y}{self.bind_port}{c.RS} {ssl_http_enabled}")
+            print(f"{BOLD}HTTP File Server:: {RST}{YELLOW}{self.bind_address}{RST}:{YELLOW}{self.bind_port}{RST} {ssl_http_enabled}")
             threading.Thread(target=self.file_server.serve_forever, daemon=True, name="httpServerThread").start()
 
         except OSError:
 
-            print(f"\n{c.alt} {c.O}Error{c.RS}: Failed to start HTTP File Server, unknown error occurred.")
+            print(f"\n{ERROR} Failed to start HTTP File Server, unknown error occurred.")
             exit(0)
 
 
@@ -149,7 +148,7 @@ class SSLSetup:
             context.load_cert_chain(cert_file, key_file)
 
         except FileNotFoundError:
-            print(f"\n{c.alt} {c.O}Error{c.RS}: Failed to start SSL Server, cert.pem or key.pem not found")
+            print(f"\n{ERROR} Failed to start SSL Server, cert.pem or key.pem not found")
             exit(0)
 
         return context

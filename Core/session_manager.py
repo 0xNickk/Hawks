@@ -30,7 +30,7 @@ class SessionManager:
         agents = agents_db.get_agents()
 
         if not agents:
-            print(f"\n{c.alt} No active sessions")
+            print(f"\n{ALERT} No active sessions")
             return
 
         fields = ['session_id', 'agent_ip', 'os', 'user', 'status']
@@ -43,9 +43,9 @@ class SessionManager:
         print(" ".join(f"{'-' * max_lengths[field]:<{max_lengths[field]}}" for field in fields))
 
         for agent in agents:
-            status_color = c.G if agent['status'] == 'Active' else c.O
+            status_color = GREEN if agent['status'] == 'Active' else ORANGE
             print(" ".join(
-                f"{agent[field] if field != 'status' else status_color + agent[field] + c.RS:<{max_lengths[field]}}" for
+                f"{agent[field] if field != 'status' else status_color + agent[field] + RST:<{max_lengths[field]}}" for
                 field in fields))
 
 
@@ -58,7 +58,7 @@ class SessionManager:
             return True
 
         elif not agents_db.valid_session_id(session_id):
-            print(f"\n{c.alt} Invalid session id")
+            print(f"\n{ALERT} Invalid session id")
             return False
 
         else:
@@ -77,7 +77,7 @@ class SessionManager:
             user = agents_db.get_agent_user(session_id)
             self.current_session[session_id] = socket, user
 
-            print(f"\n{c.info} Interactive session with {c.G}{user}{c.RS} as started")
+            print(f"\n{INFO} Interactive session with {GREEN}{user}{RST} as started")
 
         else:
             return
@@ -93,7 +93,7 @@ class SessionManager:
             else:
 
                 user = agents_db.get_agent_user(session_id)
-                confirm = input(f"\n{c.add} Are you sure you want kill this session ({c.G}{user}{c.RS}) [y/n]: ")
+                confirm = input(f"\n{ADD} Are you sure you want kill this session ({GREEN}{user}{RST}) [y/n]: ")
 
                 if confirm.lower().strip() in ["y", "yes"]:
                     agents_db.delete_agent(session_id)
@@ -102,7 +102,7 @@ class SessionManager:
                     conn.close()
                     self.clearSession(session_id)
 
-                    print(f"{c.info} Session terminated")
+                    print(f"{INFO} Session terminated")
 
             return
 
@@ -140,10 +140,10 @@ class SessionManager:
                     pass
 
             agents_db.clear_table()
-            print(f"\n{c.info} All sessions terminated")
+            print(f"\n{INFO} All sessions terminated")
 
         else:
-            print(f"\n{c.alt} No active sessions")
+            print(f"\n{ALERT} No active sessions")
 
     def setAlias(self, session_id, alias):
         agents_db = AgentsDB()
@@ -151,7 +151,7 @@ class SessionManager:
         if self.valid_session_id(session_id):
 
             if self.sessions_alias.get(alias):
-                print(f"\n{c.alt} Alias name {alias} already in use")
+                print(f"\n{ALERT} Alias name {alias} already in use")
                 return
 
             else:
@@ -171,6 +171,6 @@ class SessionManager:
                 agents_db.set_alias(session_id, alias)
                 self.sessions_alias[alias] = session_id
 
-                print(f"\n{c.info} Alias ({alias}) set for session: {c.RS}{agents_db.get_agent_user(alias)}{c.RS}")
+                print(f"\n{INFO} Alias ({alias}) set for session: {RST}{agents_db.get_agent_user(alias)}{RST}")
 
 

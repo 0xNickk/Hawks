@@ -22,10 +22,9 @@ class Menu:
 
             for session_id, (socket, user) in SessionManager.current_session.items():
                 computer_name = user.split("/")[0]
-                return f"\n{c.UND}Hawks{c.RS}({c.bold}{computer_name}){c.RS}> "
+                return f"\n{UNDERLINE}Hawks{RST}({BOLD}{computer_name}){RST}> "
         else:
-
-            return f"\n{c.UND}Hawks{c.RS}> "
+            return f"\n{UNDERLINE}Hawks{RST}> "
 
     def menu(self):
         
@@ -36,7 +35,6 @@ class Menu:
 
             while True:
                 auto_complete.command_history()
-                
                 command = input(self.main_prompt())
                 
                 if len(command) == 0:
@@ -54,31 +52,31 @@ class Menu:
                     else:
 
                         if second_arg == "kill":
-                            help_kill()
+                            print(Helper.help_kill)
                             
                         elif second_arg == "sessions":
-                            help_sessions()
+                            print(Helper.help_sessions)
                             
                         elif second_arg == "alias":
-                            help_alias()
+                            print(Helper.help_alias)
                         
                         elif second_arg == "interact":
-                            help_interact()
+                            print(Helper.help_interact)
                             
                         elif second_arg == "generate":
-                            help_generate()
-                            
+                            print(Helper.help_generate)
+
                         elif second_arg == "shell":
-                            help_shell()
+                            print(Helper.help_shell)
 
                         elif second_arg == "upload":
-                            help_upload()
+                            print(Helper.help_upload)
                             
                         elif second_arg == "download":
-                            help_download()
+                            print(Helper.help_download)
                             
                         else:
-                            print(f"\n{c.alt} No help available for {second_arg} command")
+                            print(f"\n{ALERT} No help available for {second_arg} command")
                             
                     
                 elif main_arg  == "clear":
@@ -92,13 +90,13 @@ class Menu:
                     if len(args) == 1:
                         session.view_sessions()
                     else:
-                        print(f"\n{c.alt} Invalid argument")
+                        print(f"\n{ALERT} Invalid argument")
                         
                         
                 elif main_arg  == "alias":
                     
                     if len(args) < 3:
-                        print(f"\n{c.alt} Missing <session id> or <alias name> argument")
+                        print(f"\n{ALERT} Missing <session id> or <alias name> argument")
                             
                     else:
                         session_id = second_arg.strip()
@@ -110,7 +108,7 @@ class Menu:
                 elif main_arg  == "kill":
                     
                     if len(args) < 2:
-                        print(Message.missSessionId)
+                        print(f"{ALERT} Missing <session id> argument")
 
                     else:
                         session_id = second_arg.strip()
@@ -124,7 +122,7 @@ class Menu:
                 elif main_arg  == "interact":
                     
                     if len(args) < 2:
-                        print(Message.missSessionId)
+                        print(f"{ALERT}  Missing <session id> argument")
                         
                     else:
                         session_id = second_arg.strip()
@@ -134,7 +132,7 @@ class Menu:
                 elif main_arg  == "shell":
                     
                     if not SessionManager.current_session:
-                        print(f"\n{c.alt} No session selected")
+                        print(f"\n{ALERT} No session selected")
                         
                     else:
                         socket = self.get_current_session_value()
@@ -145,7 +143,7 @@ class Menu:
                 elif main_arg == "generate":
                     
                     if len(args) < 2:
-                        print(f"\n{c.alt} Missing <payload_template> argument")
+                        print(f"\n{ALERT} Missing <payload_template> argument")
                         
                     else:
                         payload_template = args[1].strip()
@@ -153,13 +151,13 @@ class Menu:
                         if len(args) < 3:  
                             
                             if payload_template == "windows/powershell_reverse_tcp":
-                                help_powershell_payload()
+                                print(Payload_Helper.help_powershell)
                                 
                             elif payload_template == "windows/powershell_reverse_tcp_ssl":
-                                help_powershell_ssl_payload()
+                                print(Payload_Helper.help_powershell_ssl)
                                 
                             else:
-                                print(f"\n{c.alt} Payload template not found")
+                                print(f"\n{ALERT} Payload template not found")
                                 
                         else:
 
@@ -175,7 +173,7 @@ class Menu:
                                 elif lhost == "ngrok":
                                     
                                     if not TCPServerSettings.ngrok_tunnel:
-                                        print(f"\n{c.alt} Ngrok tunnel not active")
+                                        print(f"\n{ALERT} Ngrok tunnel not active")
                                         continue
                                     
                                     lhost = TCPServerSettings.ngrok_addr
@@ -183,7 +181,7 @@ class Menu:
                                     
 
                                 else: 
-                                    print(f"\n{c.alt} Network interface not found") 
+                                    print(f"\n{ALERT} Network interface not found")
                                     continue
                                     
                             if len(args) > 3:
@@ -192,7 +190,7 @@ class Menu:
                                 if obfuscate == "obfuscate":
                                     obfuscate = True  
                                 else:
-                                    print(f"\n{c.alt} Invalid argument")
+                                    print(f"\n{ALERT} Invalid argument")
                                     continue
                             else:
                                 obfuscate = False
@@ -205,12 +203,12 @@ class Menu:
                     
                     if not SessionManager.current_session:
                         
-                        print(f"\n{c.alt} No session selected")
+                        print(f"\n{ALERT} No session selected")
                         
                     else:
                         
                         if len(args) < 3:
-                            print(f"\n{c.alt} Missing <file path> <target path> arguments")
+                            print(f"\n{ALERT} Missing <file path> <target path> arguments")
                             
                         else: 
                             local_path = args[1].strip()
@@ -224,11 +222,11 @@ class Menu:
                 elif main_arg == "download":
                         
                     if not SessionManager.current_session:
-                        print(f"\n{c.alt} No session selected")
+                        print(f"\n{ALERT} No session selected")
 
                     else:
                         if len(args) < 2:
-                            print(f"\n{c.alt} Missing <file path> argument")
+                            print(f"\n{ALERT} Missing <file path> argument")
 
                         else:
                             download_path = args[1].strip()
@@ -238,7 +236,7 @@ class Menu:
                             agent.downloadFile(download_path)
                     
                 else:
-                    print(f"\n{c.alt} Invalid command")
+                    print(f"\n{ALERT} Invalid command")
                     
         except KeyboardInterrupt:
             self.quit_hawks()
@@ -248,30 +246,26 @@ class Menu:
         for session_id, (socket, user) in SessionManager.current_session.items():
             return socket
 
+    @staticmethod
+    def quit_hawks():
 
-    def quit_hawks(self):
-        
         if SessionManager.agents_connections:
 
-            confirm = input(f"\n\n{c.alt} Are you sure you want exit? All your connection/sessions will be {c.O}lost{c.RS} [y/n]: ")
-            
+            confirm = input(f"\n\n{ALERT} Are you sure you want exit? All your connection/sessions will be {ORANGE}lost{RST} [y/n]: ")
+
             if confirm.lower().strip() in ["y", "yes"]:
-                
+
                 agents_db = AgentsDB()
                 session = SessionManager()
 
                 session.killAllSessions()
                 agents_db.clear_table()
 
-            
-                thanks()
-                exit()
-
             else:
-                self.menu()
-                
-        else:
-            thanks()
-            exit(0)
-            
+                return
+
+
+        print_thanks_message()
+        exit(0)
+
         

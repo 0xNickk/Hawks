@@ -1,3 +1,5 @@
+import threading
+
 from Core.common import *
 from Core.settings import TCPServerSettings, HTTPFileServerSettings, SSLSettings
 from Core.listener import TCPServer, HttpFileServer
@@ -15,7 +17,7 @@ def main():
         
     print_banner()
     
-    print(f"{c.info} Initializing services:")
+    print(f"{INFO} Initializing services:")
     
     agents_db = AgentsDB()
     agents_db.create_table()
@@ -32,8 +34,8 @@ def main():
     tcp_server.start()
     http_server.start()
 
-    print(f"\n{c.info} Welcome! Type 'help' to see available commands{c.RS}")
-    
+    print(f"\n{INFO} Welcome! Type 'help' to see available commands{RST}")
+
     Menu()
     
 
@@ -46,10 +48,14 @@ def SSLConfig():
 
     if len(os.listdir(ssl_dir)) == 2:
 
-        prompt = input(f"{c.add} Found existing SSL keys{c.RS}, use them? (y/n) : ")
-        if prompt.lower() == "y":
-            return
+        try:
 
+            prompt = input(f"{ADD} Found existing SSL keys{RST}, use them? (y/n) : ")
+            if prompt.lower() == "y":
+                return
+
+        except KeyboardInterrupt:
+            exit()
     else:
         generate_keys()
 

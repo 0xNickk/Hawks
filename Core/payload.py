@@ -18,10 +18,10 @@ class PayloadGenerator:
 
         try:
             pyperclip.copy(payload)
-            print(f"\n{c.info} Payload copied to clipboard")
+            print(f"\n{INFO} Payload copied to clipboard")
 
         except Exception:
-            print(f"{c.alt} Error copying payload to clipboard")
+            print(f"{ERROR} Copying payload to clipboard")
 
     def obfuscation(self, payload):
 
@@ -72,9 +72,9 @@ class PayloadGenerator:
 
 
         else:
-            print(f"{c.alt} Payload template not found")
+            print(f"{ALERT} Payload template not found")
 
-        print(f"\n{c.info} Payload generated\n")
-        print(f"{c.Y}{generated}{c.RS}")
+        print(f"\n{INFO} Generating ({self.payload_template}) payload ... \n")
+        print(f"{YELLOW}{generated}{RST}")
 
         self.copy_to_clipboard(generated)

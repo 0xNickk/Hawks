@@ -203,15 +203,15 @@ class Obfuscate:
     def setPayload(self):
         
         while True:
-            self.payload  = input(f"\n{c.add} Enter payload: ")
+            self.payload  = input(f"\n{ADD} Enter payload: ")
             self.defaultPayload = self.payload
             
             if len(self.payload) == 0:
-                print(f"{c.alt} Payload cannot be empty")
+                print(f"{ALERT} Payload cannot be empty")
                 continue
             
             else:
-                print(f"\n{c.add} Default payload: {c.Y}{self.payload}{c.RS}", )
+                print(f"\n{ADD} Default payload: {YELLOW}{self.payload}{RST}", )
                 self.menu()
                 
                 
@@ -276,7 +276,7 @@ class Obfuscate:
                 
             elif choice == 12:
                 self.payload = self.defaultPayload
-                print(f"\n{c.add} Obfuscation techniques removed")
+                print(f"\n{ADD} Obfuscation techniques removed")
                                 
             elif choice == 13:
                 self.setPayload()
@@ -287,7 +287,7 @@ class Obfuscate:
             else:
                 print("Invalid choice")
             
-            print(f"\n{c.add} Payload: {c.Y}{self.payload.strip()}{c.RS}" )  
+            print(f"\n{ADD} Payload: {YELLOW}{self.payload.strip()}{RST}" )
             
             payloadLength = len(self.payload)
             if payloadLength > 8190:
