@@ -4,15 +4,15 @@ from .settings import TCPServerSettings
 from .session_manager import *
 from .database import AgentsDB
 from .common import *
-from .logging import AutoComplete
-from .listener import TCPServer, HttpFileServer
-import psutil
+import psutil, readline
+
 
 
 class Menu:
     
     def __init__(self):
         self.menu()
+        self.shell_active = False
 
 
     @staticmethod
@@ -30,10 +30,11 @@ class Menu:
         
         session = SessionManager()
         auto_complete = AutoComplete()
-        
+
         try:
 
             while True:
+
                 auto_complete.command_history()
                 command = input(self.main_prompt())
                 
@@ -122,7 +123,7 @@ class Menu:
                 elif main_arg  == "interact":
                     
                     if len(args) < 2:
-                        print(f"{ALERT}  Missing <session id> argument")
+                        print(f"\n{ALERT}  Missing <session id> argument")
                         
                     else:
                         session_id = second_arg.strip()
@@ -135,10 +136,11 @@ class Menu:
                         print(f"\n{ALERT} No session selected")
                         
                     else:
+
                         socket = self.get_current_session_value()
                         agent = Agent(socket)
                         agent.shell()
-                            
+
                             
                 elif main_arg == "generate":
                     
@@ -151,10 +153,10 @@ class Menu:
                         if len(args) < 3:  
                             
                             if payload_template == "windows/powershell_reverse_tcp":
-                                print(Payload_Helper.help_powershell)
+                                print(PayloadHelper.help_powershell)
                                 
                             elif payload_template == "windows/powershell_reverse_tcp_ssl":
-                                print(Payload_Helper.help_powershell_ssl)
+                                print(PayloadHelper.help_powershell_ssl)
                                 
                             else:
                                 print(f"\n{ALERT} Payload template not found")
@@ -268,4 +270,5 @@ class Menu:
         print_thanks_message()
         exit(0)
 
-        
+
+

@@ -15,9 +15,9 @@ ADD = "[+]"
 LOAD = "[~]"
 ERROR = f"[{ORANGE}Error{RST}]"
 INFO = f"[{GREEN}Info{RST}]"
-FILESERVER = f"[{YELLOW}Fileserver{RST}]"
+FILESERVER = f"[{YELLOW}File-Server{RST}]"
 SHELL = f"[{YELLOW}Shell{RST}]"
-TCPSERVER = f"[{YELLOW}TCPserver{RST}]"
+TCPSERVER = f"[{BOLD}TCP-Listener{RST}]"
 
 
 class Helper:
@@ -31,18 +31,61 @@ class Helper:
     help_upload = f"\nUpload a file to agent\n{ORANGE}Usage{RST}: upload <local file path> <upload file path>"
 
 
-class Payload_Helper:
+class PayloadHelper:
     help_powershell = f"\nWindows PowerShell Reverse TCP\n{ORANGE}Required arguments{RST}: <lhost>\nSupported utilities: obfuscate"
     help_powershell_ssl = f"\nWindows PowerShell Reverse TCP SSL\n{ORANGE}Required arguments{RST}: <lhost>\nSupported utilities: obfuscate"
 
 
-class Main_Prompt:
-
+class MainPrompt:
     prompt = f"\n{UNDERLINE}Hawks{RST}> "
 
     @staticmethod
     def rst_prompt_menu():
-        sys.stdout.write('\r' + Main_Prompt.prompt + readline.get_line_buffer())
+        sys.stdout.write('\r' + MainPrompt.prompt + readline.get_line_buffer())
+
+    @staticmethod
+    def rst_shell_prompt(path):
+        sys.stdout.write('\r' + path + readline.get_line_buffer())
+
+
+class AutoComplete:
+    defaultCommands = [
+        "help ", "interact ", "generate ", "kill ", "clear", "shell", "screen", "upload ", "download ", "sessions ",
+        "lhost=", "obfuscate", "rename ", "alias ", "windows/", "powershell_reverse_tcp", "exit", "ssl"]
+
+    sessionsCommands = []
+
+    def __init__(self):
+        pass
+
+    def auto_complete(self, command, state):
+
+        options = [cmd for cmd in self.defaultCommands + self.sessionsCommands if cmd.startswith(command)]
+
+        if state < len(options):
+            return options[state]
+        else:
+            return None
+
+    def parse_command(self, command):
+
+        try:
+            readline.add_history(command)
+
+        except:
+
+            if len(command) == 0:
+                pass
+
+        return command.split()
+
+    def command_history(self):
+
+        readline.set_completer(self.auto_complete)
+        readline.parse_and_bind('tab: complete')
+
+        readline.parse_and_bind('"\e[A": history-search-backward')
+        readline.parse_and_bind('"\e[B": history-search-forward')
 
 
 def print_banner():

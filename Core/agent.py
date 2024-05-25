@@ -2,13 +2,12 @@ from .common import *
 from .settings import HTTPFileServerSettings
 from .session_manager import SessionManager
 from .database import AgentsDB
-from .logging import AutoComplete
 from .payloads import powershell_download_file, powershell_upload_file, powershell_upload_file_ssl, powershell_download_file_ssl
 
 from http.server import BaseHTTPRequestHandler
 from base64 import b64decode
 from tqdm import tqdm
-import socket, os, re, time, threading
+import socket, os, re, time, threading, datetime
 
 
 
@@ -18,7 +17,7 @@ class Agent:
         
         self.path = None
         self.conn = connection
-        self.shell_active = True
+        self.shell_active = False
         self.buff = 4096
 
 
@@ -33,10 +32,12 @@ class Agent:
                 os_type = "Linux"
 
                 self.send_command("hostname")
-                response = self.receive_all().split('\n')
+                hostname = self.receive_all()
 
-                hostname = response[0].strip('\r').upper()
-                user = response[1].strip('\r')
+                self.send_command("whoami")
+                user = self.receive_all()
+
+                print(hostname, user)
 
             else:
 
@@ -76,8 +77,7 @@ class Agent:
 
         agents_db = AgentsDB()
 
-
-        session_id = SessionManager.createSessionId()
+        session_id = SessionManager.create_session_id()
         SessionManager.agents_connections[session_id] = self.conn
 
         try:
@@ -87,8 +87,8 @@ class Agent:
 
         user_and_hostname = f"{hostname}/{user}"
 
-        print(f"\n\n{INFO} Connection with {GREEN}{agent_ip}:{agent_port}{RST} established")
-        Main_Prompt.rst_prompt_menu()
+        print(f"\n\n{TCPSERVER} Connection with {GREEN}{agent_ip}:{agent_port}{RST} established")
+        MainPrompt.rst_prompt_menu()
 
         AutoComplete.defaultCommands.append(session_id)
         loot_path = f"Loots/{hostname}"
@@ -104,9 +104,8 @@ class Agent:
 
             print(f"{ERROR} An error occurred while trying to create loot directory: {e}")
 
-
-        agents_db.add_agent(session_id, agent_ip, os_type, user_and_hostname, "Active")
         threading.Thread(target=self.is_agent_alive, daemon=True, name="is_agent_alive_thread").start()
+        agents_db.add_agent(session_id, agent_ip, os_type, user_and_hostname, "Active", datetime.datetime.now().strftime("%H:%M:%S"))
 
 
     @staticmethod
@@ -119,7 +118,7 @@ class Agent:
             if not SessionManager.agents_connections:
                 return
 
-            time.sleep(1)
+            time.sleep(2)
 
             for session_id, conn in SessionManager.agents_connections.items():
                 try:
@@ -129,8 +128,11 @@ class Agent:
                         agents_db.update_agent_status(session_id, "Inactive")
                         user = agents_db.get_agent_user(session_id)
                         print(f"\n\n{ALERT} Connection with Agent {RST}{ORANGE}{user}{RST} lost")
-                        Main_Prompt.rst_prompt_menu()
+                        MainPrompt.rst_prompt_menu()
                         pass
+
+                    else:
+                        agents_db.update_last_ping(session_id, datetime.datetime.now().strftime("%H:%M:%S"))
 
                 except socket.timeout:
                     pass
@@ -227,7 +229,7 @@ class Agent:
             return response.replace('>', '').strip()
     
     @staticmethod
-    def update_session_commands(command_executed, command_output):
+    def update_autocomplete_commands(command_executed, command_output):
         
         commands = command_executed.split()
         for command in commands:
@@ -249,10 +251,11 @@ class Agent:
         return file_names
 
 
-                
+
     def shell(self):
 
         print(f"\n{ADD} Interactive shell activated\n{INFO} Type 'exit' or press 'CTRL+C' to deactivate\n")
+        self.shell_active = True
         self.init_path()
 
         while True:
@@ -321,7 +324,7 @@ class Agent:
 
                         file_names = self.get_file_names(response)
 
-                        self.update_session_commands(command, file_names)
+                        self.update_autocomplete_commands(command, file_names)
 
                         print(f"{GREEN}{response}{RST}")
 
@@ -333,7 +336,6 @@ class Agent:
 
             else:
                 break
-
 
     def file_path_exists(self, file_path):
 

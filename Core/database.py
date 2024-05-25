@@ -49,7 +49,8 @@ class AgentsDB:
                 agent_ip    TEXT,
                 os          TEXT,
                 user        TEXT,
-                status      TEXT
+                status      TEXT,
+                last_ping   TEXT
             )
             '''
         )
@@ -57,9 +58,9 @@ class AgentsDB:
         self.dbConn.commit()
         
         
-    def add_agent(self, session_id, agent_ip, os, user, status):
+    def add_agent(self, session_id, agent_ip, os, user, status, last_ping):
 
-        self.cursor.execute("INSERT INTO agents (session_id, agent_ip, os, user, status) VALUES (?, ?, ?, ?, ?)", (session_id, agent_ip, os, user, status))
+        self.cursor.execute("INSERT INTO agents (session_id, agent_ip, os, user, status, last_ping) VALUES (?, ?, ?, ?, ?, ?)", (session_id, agent_ip, os, user, status, last_ping))
         self.dbConn.commit()
 
     def update_agent_status(self, session_id, status):
@@ -82,7 +83,7 @@ class AgentsDB:
 
         self.cursor.execute("SELECT * FROM agents")
         rows = self.cursor.fetchall()
-        agents = [{"session_id": row[0], "agent_ip": row[1], "os": row[2], "user": row[3], "status": row[4]} for row in rows]
+        agents = [{"session_id": row[0], "agent_ip": row[1], "os": row[2], "user": row[3], "status": row[4], "last_ping": row[5]} for row in rows]
         return agents
     
     def get_agent_user(self, session_id):
@@ -107,7 +108,11 @@ class AgentsDB:
         self.cursor.execute("SELECT status FROM agents WHERE session_id=?", (session_id,))
         status = self.cursor.fetchone()
         return status[0] == "Active" if status else None
-    
+
+    def update_last_ping(self, session_id, last_ping):
+
+        self.cursor.execute("UPDATE agents SET last_ping=? WHERE session_id=?", (last_ping, session_id))
+        self.dbConn.commit()
     
 
 class ListenersDB:

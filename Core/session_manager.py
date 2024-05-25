@@ -1,5 +1,4 @@
 from .common import *
-from .logging import AutoComplete
 from .database import AgentsDB
 import binascii
 import os
@@ -7,16 +6,16 @@ import os
 
 class SessionManager:
 
-    current_session = {}  #sessionId: socket, user, computerName
-    agents_connections = {}  #sessionId: socket
-    sessions_alias = {}  #alias: sessionId
-    loots_paths = {}  #sessionId: lootPath
+    current_session = {}  #sessionId: socket, user, computer_name, shell_active
+    agents_connections = {}  #session_id: socket
+    sessions_alias = {}  #alias: session_id
+    loots_paths = {}  #session_id: loot_path
 
     def __init__(self):
         self.killAll = False
 
     @staticmethod
-    def createSessionId():
+    def create_session_id():
 
         seed = binascii.b2a_hex(os.urandom(9)).decode('utf-8')
         session_id = '-'.join([seed[i:i + 6] for i in range(0, len(seed), 6)])
@@ -33,17 +32,19 @@ class SessionManager:
             print(f"\n{ALERT} No active sessions")
             return
 
-        fields = ['session_id', 'agent_ip', 'os', 'user', 'status']
-        field_names = ['Session ID', 'IP Address', 'OS', 'User', 'Status']
+        fields = ['session_id', 'agent_ip', 'os', 'user', 'status', 'last_ping']
+        field_names = ['Session ID', 'IP Address', 'OS', 'User', 'Status', 'Last Ping']
 
-        max_lengths = {field: max(max(len(agent[field]), len(field_name)) for agent in agents) + 1 for field, field_name
-                       in zip(fields, field_names)}
+        max_lengths = {field: max(max(len(str(agent[field])), len(field_name)) for agent in agents) for
+                       field, field_name in zip(fields, field_names)}
 
         print("\n" + " ".join(f"{field_name:<{max_lengths[field]}}" for field, field_name in zip(fields, field_names)))
         print(" ".join(f"{'-' * max_lengths[field]:<{max_lengths[field]}}" for field in fields))
 
         for agent in agents:
+
             status_color = GREEN if agent['status'] == 'Active' else ORANGE
+
             print(" ".join(
                 f"{agent[field] if field != 'status' else status_color + agent[field] + RST:<{max_lengths[field]}}" for
                 field in fields))
@@ -83,6 +84,7 @@ class SessionManager:
             return
 
     def kill_session(self, session_id):
+
         agents_db = AgentsDB()
 
         if self.valid_session_id(session_id):
@@ -106,6 +108,7 @@ class SessionManager:
 
             return
 
+
     def delete_session(self, session_id, agents_db=AgentsDB()):
 
         if self.sessions_alias.get(session_id):
@@ -118,6 +121,7 @@ class SessionManager:
         self.current_session.clear()
 
         agents_db.delete_agent(session_id)
+
 
     def kill_all_sessions(self):
 
@@ -145,7 +149,9 @@ class SessionManager:
         else:
             print(f"\n{ALERT} No active sessions")
 
+
     def set_alias(self, session_id, alias):
+
         agents_db = AgentsDB()
 
         if self.valid_session_id(session_id):
@@ -157,14 +163,17 @@ class SessionManager:
             else:
 
                 if self.agents_connections.get(session_id):
+
                     socket = self.agents_connections.pop(session_id)
                     self.agents_connections[alias] = socket
 
                 if session_id in AutoComplete.defaultCommands:
+
                     AutoComplete.defaultCommands.remove(session_id)
                     AutoComplete.defaultCommands.append(alias)
 
                 if session_id in self.loots_paths:
+
                     loot_path = self.loots_paths.pop(session_id)
                     self.loots_paths[alias] = loot_path
 
