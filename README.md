@@ -9,6 +9,7 @@ Hawks framework main features include:
 
 - Download and upload files (via HTTP)
 - Support SSL encryption 
+- Accept external TCP reverse shell connections (via ngrok)
 - Auto-completion of commands
 - Multiple reverse shell connections
 - Command history
