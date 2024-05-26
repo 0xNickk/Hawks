@@ -77,7 +77,10 @@ class TCPServer:
                 print(f"\n{ALERT} Failed to start ngrok TCP tunnel, {e}")
                 return
 
-        print(f"\n{BOLD}TCP Multi-Handler:: {RST}{YELLOW}{self.bind_address}{RST}:{YELLOW}{self.bind_port}{RST} {ssl_tcp_enabled}")
+        tcp_listener_service = f"{BOLD}TCP Multi-Handler:: {RST}{YELLOW}{self.bind_address}{RST}:{YELLOW}{self.bind_port}{RST} {ssl_tcp_enabled}"
+        print(f"\n{tcp_listener_service}")
+
+        services.append(tcp_listener_service)
 
         self.is_listen = True
         self.tcp_listener.listen()
@@ -117,11 +120,15 @@ class HttpFileServer:
 
             if self.SSL:
 
-                context = SSLSetup.setup_ssl_context(SSLSettings.ssl_dir + SSLSettings.cert_file,SSLSettings.ssl_dir + SSLSettings.key_file)
+                context = SSLSetup.setup_ssl_context(SSLSettings.ssl_dir + SSLSettings.cert_file, SSLSettings.ssl_dir + SSLSettings.key_file)
                 self.file_server.socket = context.wrap_socket(self.file_server.socket, server_side=True)
                 ssl_http_enabled = "(SSL)"
 
-            print(f"{BOLD}HTTP File Server:: {RST}{YELLOW}{self.bind_address}{RST}:{YELLOW}{self.bind_port}{RST} {ssl_http_enabled}")
+            file_server_service = f"{BOLD}HTTP File Server:: {RST}{YELLOW}{self.bind_address}{RST}:{YELLOW}{self.bind_port}{RST} {ssl_http_enabled}"
+            print(file_server_service)
+
+            services.append(file_server_service)
+
             threading.Thread(target=self.file_server.serve_forever, daemon=True, name="httpServerThread").start()
 
         except OSError:
@@ -134,6 +141,7 @@ class HttpFileServer:
 
         self.file_server.shutdown()
         self.file_server.server_close()
+
 
 
 

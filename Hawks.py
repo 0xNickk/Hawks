@@ -1,7 +1,7 @@
 import threading
 
 from Core.common import *
-from Core.settings import TCPServerSettings, HTTPFileServerSettings, SSLSettings
+from Core.settings import TCPServerSettings, HTTPFileServerSettings, SSLSettings, CoreSettings
 from Core.listener import TCPServer, HttpFileServer
 from Core.menu import Menu
 from Core.database import AgentsDB, ListenersDB
@@ -12,8 +12,8 @@ import os
 
 def main():
 
-    if not os.path.exists("Loots"):
-        os.mkdir("Loots")
+    if not os.path.exists(CoreSettings.loot_path):
+        os.mkdir(CoreSettings.loot_path)
         
     print_banner()
     

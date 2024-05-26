@@ -24,8 +24,8 @@ class SessionManager:
 
     @staticmethod
     def view_sessions():
-
         agents_db = AgentsDB()
+
         agents = agents_db.get_agents()
 
         if not agents:

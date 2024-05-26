@@ -1,6 +1,5 @@
 from .common import *
-from .payloads import powershell_reverse_tcp, powershell_reverse_tcp_ssl
-from .settings import TCPServerSettings
+from .payloads.Windows import powershell_reverse_tcp_ssl, powershell_reverse_tcp
 from .obfuscation import *
 import pyperclip
 

@@ -1,5 +1,5 @@
 from os import system
-import readline, sys
+import readline, sys, subprocess
 
 #Colors
 ORANGE = '\033[93m'
@@ -18,6 +18,9 @@ INFO = f"[{GREEN}Info{RST}]"
 FILESERVER = f"[{YELLOW}File-Server{RST}]"
 SHELL = f"[{YELLOW}Shell{RST}]"
 TCPSERVER = f"[{BOLD}TCP-Listener{RST}]"
+
+
+services = []
 
 
 class Helper:
@@ -51,7 +54,7 @@ class MainPrompt:
 class AutoComplete:
     defaultCommands = [
         "help ", "interact ", "generate ", "kill ", "clear", "shell", "screen", "upload ", "download ", "sessions ",
-        "lhost=", "obfuscate", "rename ", "alias ", "windows/", "powershell_reverse_tcp", "exit", "ssl"]
+        "obfuscate", "rename ", "alias ", "windows/", "powershell_reverse_tcp", "exit", "ssl", "loots", "services"]
 
     sessionsCommands = []
 
@@ -88,6 +91,25 @@ class AutoComplete:
         readline.parse_and_bind('"\e[B": history-search-forward')
 
 
+
+def display_services():
+
+    print("\n")
+    for service in services:
+        print(f"{service}")
+
+
+def display_loots(loots):
+
+    try:
+        subprocess.run(["xdg-open", loots])
+        print(f"\n{INFO} Loots directory opened")
+
+    except FileNotFoundError:
+
+        print(f"\n{ERROR} xdg-open not found")
+
+
 def print_banner():
     print(f'''
 
@@ -109,15 +131,15 @@ def help():
   interact   [+]   Interact with an agent
   alias      [+]   Set an alias for a session
   generate   [+]   Generate payloads 
+  services   [~]   Show running services
+  loots      [~]   Show looted files
   download   [+]   Download a file from agent
   upload     [+]   Upload a file to agent
   kill       [+]   Terminate a session
   exit       [+]   Kill all sessions and quit
   clear      [~]   Clear screen
-
-
+  
   shell      [+]   Enable interactive reverse shell
-  screen     [~]   Get a screenshot of client screen
 
   Command with [+] required additional actions
   TAB for auto-completion commands

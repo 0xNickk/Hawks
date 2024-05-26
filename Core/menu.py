@@ -1,10 +1,10 @@
 from .agent import Agent
 from .payload import PayloadGenerator
-from .settings import TCPServerSettings
+from .settings import TCPServerSettings, CoreSettings
 from .session_manager import *
 from .database import AgentsDB
 from .common import *
-import psutil, readline
+import psutil
 
 
 
@@ -82,9 +82,22 @@ class Menu:
                     
                 elif main_arg  == "clear":
                     clear_screen()
+
+                elif main_arg == "loots":
+
+                    loots = CoreSettings.loot_path
+
+                    if SessionManager.current_session:
+                        session_id = list(SessionManager.current_session.keys())[0]
+                        loots = SessionManager.loots_paths[session_id]
+
+                    display_loots(loots)
                     
                 elif main_arg  == "exit":
                     self.quit_hawks()
+                elif main_arg == "services":
+
+                    display_services()
                     
                 elif main_arg  == "sessions":
                     

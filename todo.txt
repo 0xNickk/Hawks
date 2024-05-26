@@ -9,7 +9,7 @@ TODO:
     - Add command protection in shell 
     - Fix client path upload
     - Rewrite function to get IP address for bind File server listener
-    - Fix buggy obfuscastion functions
+    - Rewrite obfuscation functions
     - Get payload type running in agent
 
 

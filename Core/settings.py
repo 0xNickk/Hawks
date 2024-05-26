@@ -23,8 +23,9 @@ class SSLSettings:
 class DataBaseSettings:
     data_path      = "./data/"
     databases_path = "./data/databases/"
-    agents_file     = "agents.db"
+    agents_file    = "agents.db"
     listeners_file = "listeners.db"
 
 
-
+class CoreSettings:
+    loot_path = "./data/Loots/"
