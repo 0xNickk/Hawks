@@ -21,7 +21,10 @@ Hawks framework main features include:
 
 ## Installation
 
+
 ## Preview
+![preview](https://github.com/0xNickk/Hawks/assets/96845504/e3e6c604-3c0f-4e32-abef-9a37ac6a8c93)
+
 
 ## Usage
 
