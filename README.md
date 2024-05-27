@@ -1,7 +1,7 @@
 # Hawks 
 
 ## Description
-Hawks is a simple C2 framework written in Python, that can handle multiple TCP reverse shell connections and executed additional features. It is designed to be simple and easy to use, and it is a work in progress.
+Hawks is a simple C2 framework written in Python, that can handle multiple TCP reverse shell connections and executed additional features. It is designed to be simple and easy to use. 
 
 ## Features
 
