@@ -155,8 +155,7 @@ def ascii_encode(payload):
 def binary_encode(payload):
 
     encoded_payload = [str(bin(ord(c)))[2:] for c in payload]
-    encoded_payload = "[STRInG]::jOIn('' , ('" + ','.join(
-        encoded_payload) + "'-spLIT '@'-SpLIt ','-spLIt'Y'-sPliT 'W' -SPLIT '~' -spLiT'R'-SPliT 'N'-sPLIT 'E' -spLIt 'p'-SPLIt 'l'| forEaCH-OBjEcT{( [CONVert]::toInt16(($_.tOsTrinG() ),2 )-as [chaR])} )) | . ( $verbOSePReFeReNCE.tOSTRIng()[1,3]+'x'-joiN'')"
+    encoded_payload = "[STRInG]::jOIn('' , ('" + ','.join(encoded_payload) + "'-spLIT '@'-SpLIt ','-spLIt'Y'-sPliT 'W' -SPLIT '~' -spLiT'R'-SPliT 'N'-sPLIT 'E' -spLIt 'p'-SPLIt 'l'| forEaCH-OBjEcT{( [CONVert]::toInt16(($_.tOsTrinG() ),2 )-as [chaR])} )) | . ( $verbOSePReFeReNCE.tOSTRIng()[1,3]+'x'-joiN'')"
     return encoded_payload
 
 

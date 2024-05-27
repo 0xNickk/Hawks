@@ -154,32 +154,43 @@ class SessionManager:
 
         agents_db = AgentsDB()
 
-        if self.valid_session_id(session_id):
+        if len(alias) > 20:
+            print(f"\n{ALERT} Alias name too long")
+            return
 
-            if self.sessions_alias.get(alias):
-                print(f"\n{ALERT} Alias name {alias} already in use")
-                return
+        elif len(alias) < 3:
 
-            else:
+            print(f"\n{ALERT} Alias name too short")
+            return
 
-                if self.agents_connections.get(session_id):
+        else:
 
-                    socket = self.agents_connections.pop(session_id)
-                    self.agents_connections[alias] = socket
+            if self.valid_session_id(session_id):
 
-                if session_id in AutoComplete.defaultCommands:
+                if self.sessions_alias.get(alias):
+                    print(f"\n{ALERT} Alias name {alias} already in use")
+                    return
 
-                    AutoComplete.defaultCommands.remove(session_id)
-                    AutoComplete.defaultCommands.append(alias)
+                else:
 
-                if session_id in self.loots_paths:
+                    if self.agents_connections.get(session_id):
 
-                    loot_path = self.loots_paths.pop(session_id)
-                    self.loots_paths[alias] = loot_path
+                        socket = self.agents_connections.pop(session_id)
+                        self.agents_connections[alias] = socket
 
-                agents_db.set_alias(session_id, alias)
-                self.sessions_alias[alias] = session_id
+                    if session_id in AutoComplete.defaultCommands:
 
-                print(f"\n{INFO} Alias ({alias}) set for session: {RST}{agents_db.get_agent_user(alias)}{RST}")
+                        AutoComplete.defaultCommands.remove(session_id)
+                        AutoComplete.defaultCommands.append(alias)
+
+                    if session_id in self.loots_paths:
+
+                        loot_path = self.loots_paths.pop(session_id)
+                        self.loots_paths[alias] = loot_path
+
+                    agents_db.set_alias(session_id, alias)
+                    self.sessions_alias[alias] = session_id
+
+                    print(f"\n{INFO} Alias ({alias}) set for session: {RST}{agents_db.get_agent_user(alias)}{RST}")
 
 

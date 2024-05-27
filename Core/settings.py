@@ -5,13 +5,13 @@ class TCPServerSettings:
     ngrok_tunnel = False
     ngrok_port   = None  # Port is randomly selected by ngrok (Free plan)
     ngrok_addr   = None  # Address is randomly selected by ngrok (Free plan)
-    SSL          = False
+    SSL          = True
 
 
 class HTTPFileServerSettings:
     bind_address = "0.0.0.0"
     bind_port    = 8001
-    SSL          = False
+    SSL          = True
 
 
 class SSLSettings:
