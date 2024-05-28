@@ -3,7 +3,12 @@
 ## Description
 Hawks is a simple C2 framework written in Python, that can handle multiple TCP reverse shell connections and executed additional features. It is designed to be simple and easy to use. 
 
-## Features
+> [!WARNING]
+> This tool is created for educational purposes only. Using it for attacking targets without prior explicit consent is illegal. The author is not responsible for any misuse or damage caused by this tool.
+
+
+
+## Features 
 
 Hawks framework main features include:
 
@@ -17,9 +22,10 @@ Hawks framework main features include:
 - Modules customization
 - Different and customizable payload obfuscation techniques (bypass AMSI)
 
+
 ## Requirements
 
-## Installation
+## Installation 
 
 Clone the repository:
 ```bash
@@ -32,7 +38,7 @@ cd ./Hawks
 pip install -r requirements.txt
 ```
 
-## Configuration
+## Configuration 
 
 
 ## Preview
@@ -41,6 +47,13 @@ pip install -r requirements.txt
 
 ## Usage
 
+## Programmed features
 
+- [ ] Add new listeners 
+- [ ] Add new payload 
+- [ ] Save connections with agent
+- [ ] Persistent agent 
+- [ ] Add more Windows evasion techniques
 
-
+> [!IMPORTANT]
+> This project is still under development and i'm a beginner, so any feedback is welcome.
