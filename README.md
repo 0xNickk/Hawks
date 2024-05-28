@@ -15,7 +15,7 @@ Hawks framework main features include:
 - Command history
 - Payload generation (only powershell payloads for now)
 - Modules customization
-- Different and customize payload Obfuscation techniques (bypass AMSI)
+- Different and customizable payload obfuscation techniques (bypass AMSI)
 
 ## Requirements
 
@@ -26,8 +26,9 @@ Clone the repository:
 git clone  https://github.com/0xNickk/Hawks.git
 ```
 
-Install the required dependencies:
+Install python dependencies:
 ```bash
+cd ./Hawks
 pip install -r requirements.txt
 ```
 
