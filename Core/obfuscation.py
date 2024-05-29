@@ -30,7 +30,7 @@ def variable_rename(payload):
     return payload
 
 
-def find_cmdlets(payload):
+def find_cmdlets(payload): # Fix this
 
     find_cmdlets = r'[A-Z][a-zA-Z]*-[A-Za-z]*'
     cmdlets = re.findall(find_cmdlets, payload)
@@ -62,7 +62,7 @@ def cmdlet_concatenation(payload):
     return payload
 
 
-def find_methods(payload):
+def find_methods(payload): # Fix this
 
     find_method = r'\.[A-Z][a-zA-Z0-9_]*'
     methods = re.findall(find_method, payload)
@@ -71,7 +71,7 @@ def find_methods(payload):
     return methods
 
 
-def method_concatenation(payload):
+def method_concatenation(payload): # Fix this
 
     invalid_methods = []
     valid_methods = []

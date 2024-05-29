@@ -91,7 +91,7 @@ class Menu:
                         session_id = list(SessionManager.current_session.keys())[0]
                         loots = SessionManager.loots_paths[session_id]
 
-                    display_loots(loots)
+                    open_loot(loots)
                     
                 elif main_arg  == "exit":
                     self.quit_hawks()
@@ -214,7 +214,7 @@ class Menu:
                             payload.generatePayload()
                             
                             
-                elif main_arg == "upload":
+                elif main_arg == "upload": #Fix this
                     
                     if not SessionManager.current_session:
                         
@@ -234,7 +234,7 @@ class Menu:
                             agent.upload_file(local_path, upload_path)
                         
                                 
-                elif main_arg == "download":
+                elif main_arg == "download": #Fix this
                         
                     if not SessionManager.current_session:
                         print(f"\n{ALERT} No session selected")
@@ -244,7 +244,7 @@ class Menu:
                             print(f"\n{ALERT} Missing <file path> argument")
 
                         else:
-                            download_path = args[1].strip()
+                            download_path = args[1]
 
                             socket = self.get_current_session_value()
                             agent = Agent(socket)

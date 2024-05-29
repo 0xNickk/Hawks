@@ -46,6 +46,7 @@ def SSLConfig():
     if not os.path.exists(ssl_dir):
         os.mkdir(ssl_dir)
 
+
     if len(os.listdir(ssl_dir)) == 2:
 
         try:
@@ -57,8 +58,11 @@ def SSLConfig():
         except KeyboardInterrupt:
             exit()
     else:
-        generate_keys()
-
+        if SSLSettings.auto_generate_keys:
+            generate_keys()
+        else:
+            print(f"{ERROR} SSL keys not found, please generate them")
+            exit()
 
 
 

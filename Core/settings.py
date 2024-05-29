@@ -15,6 +15,7 @@ class HTTPFileServerSettings:
 
 
 class SSLSettings:
+    auto_generate_keys = True
     ssl_dir   = "./data/ssl/"
     cert_file = "cert.pem"
     key_file  = "key.pem"
@@ -23,8 +24,8 @@ class SSLSettings:
 class DataBaseSettings:
     data_path      = "./data/"
     databases_path = "./data/databases/"
-    agents_file    = "agents.db"
-    listeners_file = "listeners.db"
+    agents_db_file    = "agents.db"
+    listeners_db_file = "listeners.db"
 
 
 class CoreSettings:

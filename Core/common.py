@@ -9,6 +9,7 @@ GREEN = '\033[38;5;82m'
 RST = '\033[0m'
 UNDERLINE = "\033[4m"
 BOLD = '\033[1m'
+BLUE = '\033[94m'
 
 ALERT = "[*]"
 ADD = "[+]"
@@ -46,7 +47,7 @@ class MainPrompt:
     def rst_prompt_menu():
         sys.stdout.write('\r' + MainPrompt.prompt + readline.get_line_buffer())
 
-    @staticmethod
+    @staticmethod #Fix this
     def rst_shell_prompt(path):
         sys.stdout.write('\r' + path + readline.get_line_buffer())
 
@@ -99,7 +100,7 @@ def display_services():
         print(f"{service}")
 
 
-def display_loots(loots):
+def open_loot(loots):
 
     try:
         subprocess.run(["xdg-open", loots])

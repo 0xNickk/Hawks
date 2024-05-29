@@ -11,7 +11,7 @@ class AgentsDB:
         try:
             
             data_path = DataBaseSettings.data_path
-            agents_file = DataBaseSettings.agents_file
+            agents_file = DataBaseSettings.agents_db_file
             databases_path = DataBaseSettings.databases_path
         
             if not os.path.exists(data_path):
@@ -115,13 +115,13 @@ class AgentsDB:
         self.dbConn.commit()
     
 
-class ListenersDB:
+class ListenersDB:  # Programmed feature
     def __init__(self):
         
         try:
                 
             data_path = DataBaseSettings.data_path
-            listeners_file = DataBaseSettings.listeners_file
+            listeners_file = DataBaseSettings.listeners_db_file
             databases_path = DataBaseSettings.databases_path
 
             if not os.path.exists(data_path):
@@ -151,7 +151,7 @@ class ListenersDB:
     def create_table(self):
 
         self.cursor.execute(
-            
+
             '''
             CREATE TABLE IF NOT EXISTS listeners
             (   
@@ -163,34 +163,23 @@ class ListenersDB:
             )
             '''
         )
-        
+
         self.dbConn.commit()
 
-        
+
 
     def add_listener(self, listener_id, bind_address, bind_port, ssl):
 
         self.cursor.execute("INSERT INTO listeners (listener_id, bind_address, bind_port, ssl) VALUES (?, ?, ?, ?)", (listener_id, bind_address, bind_port, ssl))
         self.dbConn.commit()
 
-        
-    def delete_listener(self, listener_id):
 
-        self.cursor.execute("DELETE FROM listeners WHERE listener_id=?", (listener_id,))
-        self.dbConn.commit()
-
-    def add_payload_type(self, listener_id, payload_type):
-
-        self.cursor.execute("UPDATE listeners SET payload_type=? WHERE listener_id=?", (payload_type, listener_id))
-        self.dbConn.commit()
-        
-    
     def get_listeners(self):
 
         self.cursor.execute("SELECT * FROM listeners")
         rows = self.cursor.fetchall()
         listeners = [{"listener_id": row[0], "bind_address": row[1], "bind_port": row[2], "ssl": row[3]} for row in rows]
         return listeners
-    
+
 
 
