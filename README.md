@@ -5,7 +5,9 @@
 
 
 ## Description
-Hawks is a simple C2 framework written in Python, that can handle multiple TCP reverse shell connections and executed additional features. It is designed to be simple and easy to use. 
+Hawks is a simple C2 framework based on python which can handle multiple powershell agents through TCP and executed additional features. It support obfuscated payload generation capable of bypassing Windows Defender and almost every AV. 
+
+Hawks is designed to be simple and easy to use, providing a solid and customizable usage configuration. 
 
 > [!WARNING]
 > This tool is created for educational purposes only. Using it for attacking targets without prior explicit consent is illegal. The author is not responsible for any misuse or damage caused by this tool.
@@ -15,15 +17,24 @@ Hawks is a simple C2 framework written in Python, that can handle multiple TCP r
 
 Hawks framework main features include:
 
-- Download and upload files (via HTTP)
-- Support SSL encryption 
-- Accept external TCP reverse shell connections (via ngrok)
+- Download and upload files (via **HTTP**)
+- Support **SSL** encryption 
+- Accept external **TCP** connections (via **ngrok**)
 - Auto-completion of commands
-- Multiple reverse shell connections
+- Multiple agents control
 - Command history
-- Payload generation (only powershell payloads for now)
+- Payload generation (only PowerShell for now)
 - Modules customization
-- Different and customizable payload obfuscation techniques (bypass AMSI)
+- Various and customizable payload obfuscation techniques (**AMSI** bypass)
+
+
+## Requirements
+
+Hawks framework has been tested on the following operating systems:
+
+- Kali Linux (2024.1)
+- Parrot Security (6.0)
+
 
 ## Installation 
 
@@ -44,13 +55,12 @@ pip install -r requirements.txt
 ## Programmed features
 
 - [ ] Add new listeners 
-- [ ] Add new payload 
-- [ ] Save connections with agent
+- [ ] Add new payloads 
 - [ ] Persistent agent 
 - [ ] Add more Windows evasion techniques
 
 > [!IMPORTANT]
-> This project is still under development and I am a beginner. So feel free to give me any type of feedback. 
+> This project is still under development and I am a beginner. So feel free to give me any type of feedback and advice. 
 
 
 
